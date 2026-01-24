@@ -1,32 +1,34 @@
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Slide {
   id: string;
-  image: string;
-  heading: string;
-  subtext?: string;
+  image_url: string;
+  heading: string | null;
+  subtext: string | null;
 }
 
-// Demo slides - will be managed from admin dashboard
+// Demo slides - used when database is empty or unavailable
 const demoSlides: Slide[] = [
   {
     id: "1",
-    image: "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80",
+    image_url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80",
     heading: "Discover the Beauty of Quranic Wisdom",
     subtext: "Join our comprehensive Dars-e-Quran sessions and deepen your understanding",
   },
   {
     id: "2",
-    image: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1920&q=80",
+    image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1920&q=80",
     heading: "Learn from Authentic Scholars",
     subtext: "Access centuries of Islamic knowledge through our curated lectures and speeches",
   },
   {
     id: "3",
-    image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=1920&q=80",
+    image_url: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=1920&q=80",
     heading: "A Journey of Spiritual Growth",
     subtext: "Explore our library of Islamic books and educational resources",
   },
@@ -35,7 +37,23 @@ const demoSlides: Slide[] = [
 export function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const slides = demoSlides;
+
+  const { data: dbSlides, isLoading } = useQuery({
+    queryKey: ["hero-slides"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hero_slides")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      return data as Slide[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const slides = dbSlides && dbSlides.length > 0 ? dbSlides : demoSlides;
 
   const goToSlide = useCallback((index: number) => {
     if (isAnimating) return;
@@ -58,6 +76,14 @@ export function HeroSlider() {
     return () => clearInterval(timer);
   }, [nextSlide]);
 
+  if (isLoading) {
+    return (
+      <section className="relative w-full h-[60vh] min-h-[400px] max-h-[700px] overflow-hidden flex items-center justify-center bg-muted">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </section>
+    );
+  }
+
   return (
     <section className="relative w-full h-[60vh] min-h-[400px] max-h-[700px] overflow-hidden">
       {/* Slides */}
@@ -75,7 +101,7 @@ export function HeroSlider() {
               "absolute inset-0 bg-cover bg-center transition-transform duration-[8s]",
               index === currentSlide && "slide-animate"
             )}
-            style={{ backgroundImage: `url(${slide.image})` }}
+            style={{ backgroundImage: `url(${slide.image_url})` }}
           />
           
           {/* Overlay */}
@@ -93,7 +119,7 @@ export function HeroSlider() {
               )}
             >
               <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 text-shadow-lg leading-tight">
-                {slide.heading}
+                {slide.heading || "Welcome"}
               </h2>
               {slide.subtext && (
                 <p className="text-lg sm:text-xl md:text-2xl text-primary-foreground/90 text-shadow max-w-2xl">
