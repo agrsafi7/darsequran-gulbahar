@@ -1,0 +1,196 @@
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
+
+interface NavItem {
+  title: string;
+  href: string;
+  children?: { title: string; href: string }[];
+}
+
+const navigationItems: NavItem[] = [
+  { title: "Home", href: "/" },
+  { title: "About Us", href: "/about" },
+  {
+    title: "Dars-e-Quran",
+    href: "/dars-e-quran",
+    children: [
+      { title: "Listen Online Dars", href: "/dars-e-quran/listen" },
+      { title: "Download Dars", href: "/dars-e-quran/download" },
+      { title: "Complete Dars (Single File)", href: "/dars-e-quran/complete" },
+    ],
+  },
+  { title: "Speeches", href: "/speeches" },
+  { title: "Books", href: "/books" },
+  { title: "Contact Us", href: "/contact" },
+];
+
+export function Header() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const location = useLocation();
+
+  const isActive = (href: string) => location.pathname === href;
+
+  return (
+    <header className="sticky top-0 z-50 w-full glass border-b border-border/50">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between lg:h-20">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full hero-gradient flex items-center justify-center shadow-md group-hover:shadow-gold transition-shadow duration-300">
+              <span className="text-primary-foreground font-heading text-lg lg:text-xl">ﷲ</span>
+            </div>
+            <div className="hidden sm:block">
+              <h1 className="font-heading text-xl lg:text-2xl text-primary leading-tight">
+                Islamic Education
+              </h1>
+              <p className="text-xs text-muted-foreground">Learn • Grow • Inspire</p>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center">
+            <NavigationMenu>
+              <NavigationMenuList className="gap-1">
+                {navigationItems.map((item) => (
+                  <NavigationMenuItem key={item.title}>
+                    {item.children ? (
+                      <>
+                        <NavigationMenuTrigger 
+                          className={cn(
+                            "nav-link bg-transparent hover:bg-secondary/50",
+                            isActive(item.href) && "text-primary font-semibold"
+                          )}
+                        >
+                          {item.title}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <ul className="grid w-48 gap-1 p-2 bg-card rounded-lg shadow-lg border border-border">
+                            {item.children.map((child) => (
+                              <li key={child.title}>
+                                <NavigationMenuLink asChild>
+                                  <Link
+                                    to={child.href}
+                                    className={cn(
+                                      "block select-none rounded-md p-3 text-sm leading-none no-underline outline-none transition-colors",
+                                      "hover:bg-secondary hover:text-primary focus:bg-secondary",
+                                      isActive(child.href) && "bg-secondary text-primary font-medium"
+                                    )}
+                                  >
+                                    {child.title}
+                                  </Link>
+                                </NavigationMenuLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to={item.href}
+                          className={cn(
+                            "nav-link inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                            "hover:bg-secondary/50 hover:text-primary focus:bg-secondary/50",
+                            isActive(item.href) && "text-primary font-semibold active"
+                          )}
+                        >
+                          {item.title}
+                        </Link>
+                      </NavigationMenuLink>
+                    )}
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <nav className="lg:hidden pb-4 animate-slide-down">
+            <ul className="space-y-1">
+              {navigationItems.map((item) => (
+                <li key={item.title}>
+                  {item.children ? (
+                    <div>
+                      <button
+                        onClick={() => setOpenDropdown(openDropdown === item.title ? null : item.title)}
+                        className={cn(
+                          "flex w-full items-center justify-between rounded-md px-4 py-3 text-sm font-medium transition-colors",
+                          "hover:bg-secondary/50 hover:text-primary",
+                          isActive(item.href) && "text-primary font-semibold"
+                        )}
+                      >
+                        {item.title}
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform duration-200",
+                            openDropdown === item.title && "rotate-180"
+                          )}
+                        />
+                      </button>
+                      {openDropdown === item.title && (
+                        <ul className="ml-4 mt-1 space-y-1 animate-slide-down">
+                          {item.children.map((child) => (
+                            <li key={child.title}>
+                              <Link
+                                to={child.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={cn(
+                                  "block rounded-md px-4 py-2 text-sm transition-colors",
+                                  "hover:bg-secondary/50 hover:text-primary",
+                                  isActive(child.href) && "bg-secondary text-primary font-medium"
+                                )}
+                              >
+                                {child.title}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      to={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={cn(
+                        "block rounded-md px-4 py-3 text-sm font-medium transition-colors",
+                        "hover:bg-secondary/50 hover:text-primary",
+                        isActive(item.href) && "text-primary font-semibold bg-secondary/30"
+                      )}
+                    >
+                      {item.title}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+      </div>
+    </header>
+  );
+}

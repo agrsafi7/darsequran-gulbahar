@@ -1,0 +1,108 @@
+import { Link } from "react-router-dom";
+import { Facebook, Twitter, Youtube, Instagram, Mail } from "lucide-react";
+
+const navigationLinks = [
+  { title: "Home", href: "/" },
+  { title: "About Us", href: "/about" },
+  { title: "Dars-e-Quran", href: "/dars-e-quran" },
+  { title: "Speeches", href: "/speeches" },
+  { title: "Books", href: "/books" },
+  { title: "Contact Us", href: "/contact" },
+];
+
+const socialLinks = [
+  { icon: Facebook, href: "#", label: "Facebook" },
+  { icon: Twitter, href: "#", label: "Twitter" },
+  { icon: Youtube, href: "#", label: "YouTube" },
+  { icon: Instagram, href: "#", label: "Instagram" },
+  { icon: Mail, href: "mailto:info@example.com", label: "Email" },
+];
+
+export function Footer() {
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="footer-gradient text-primary-foreground">
+      {/* Main Footer */}
+      <div className="container mx-auto px-4 py-12 lg:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+          {/* Left Column - Logo & Description */}
+          <div className="space-y-4">
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-12 h-12 rounded-full bg-primary-foreground/10 flex items-center justify-center border border-accent/30 group-hover:border-accent transition-colors">
+                <span className="text-accent font-heading text-xl">ﷲ</span>
+              </div>
+              <div>
+                <h2 className="font-heading text-xl text-primary-foreground">Islamic Education</h2>
+                <p className="text-xs text-primary-foreground/60">Learn • Grow • Inspire</p>
+              </div>
+            </Link>
+            <p className="text-sm text-primary-foreground/80 leading-relaxed max-w-sm">
+              Dedicated to spreading authentic Islamic knowledge through Quran teachings, 
+              scholarly speeches, and educational resources. Join us on the path of learning 
+              and spiritual growth.
+            </p>
+          </div>
+
+          {/* Middle Column - Navigation */}
+          <div>
+            <h3 className="font-heading text-lg mb-4 text-accent">Quick Links</h3>
+            <nav>
+              <ul className="grid grid-cols-2 gap-2">
+                {navigationLinks.map((link) => (
+                  <li key={link.title}>
+                    <Link
+                      to={link.href}
+                      className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200 inline-block py-1"
+                    >
+                      {link.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+
+          {/* Right Column - Social Links */}
+          <div>
+            <h3 className="font-heading text-lg mb-4 text-accent">Connect With Us</h3>
+            <div className="flex gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  aria-label={social.label}
+                  className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center border border-primary-foreground/20 hover:border-accent hover:bg-accent/20 transition-all duration-300 group"
+                >
+                  <social.icon className="w-4 h-4 text-primary-foreground/80 group-hover:text-accent transition-colors" />
+                </a>
+              ))}
+            </div>
+            <div className="mt-6">
+              <p className="text-sm text-primary-foreground/60">
+                Subscribe to our newsletter for updates
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Copyright Bar */}
+      <div className="border-t border-primary-foreground/10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-primary-foreground/60">
+            <p>© {currentYear} Islamic Education Platform — All Rights Reserved</p>
+            <div className="flex gap-4">
+              <Link to="/privacy" className="hover:text-accent transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="hover:text-accent transition-colors">
+                Terms of Use
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
