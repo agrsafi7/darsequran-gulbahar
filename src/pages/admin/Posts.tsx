@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
   Table,
   TableBody,
@@ -308,15 +309,13 @@ export default function AdminPosts() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="content">Content</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, content: e.target.value }))
+                  <Label>Content</Label>
+                  <RichTextEditor
+                    content={formData.content}
+                    onChange={(content) =>
+                      setFormData((prev) => ({ ...prev, content }))
                     }
-                    rows={10}
-                    placeholder="Post content..."
+                    placeholder="Start writing your post content..."
                   />
                 </div>
                 <div className="flex items-center space-x-2">
