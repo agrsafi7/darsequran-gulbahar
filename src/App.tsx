@@ -8,6 +8,9 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import DarsEQuran from "./pages/DarsEQuran";
+import ListenOnline from "./pages/dars/ListenOnline";
+import DownloadDars from "./pages/dars/DownloadDars";
+import CompleteDars from "./pages/dars/CompleteDars";
 import Speeches from "./pages/Speeches";
 import Books from "./pages/Books";
 import AdminLogin from "./pages/admin/Login";
@@ -19,6 +22,7 @@ import AdminMedia from "./pages/admin/Media";
 import AdminComments from "./pages/admin/Comments";
 import AdminSettings from "./pages/admin/Settings";
 import AdminHeroSlides from "./pages/admin/HeroSlides";
+import AdminDarsAudio from "./pages/admin/DarsAudio";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +40,9 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/dars-e-quran" element={<DarsEQuran />} />
+            <Route path="/dars-e-quran/listen" element={<ListenOnline />} />
+            <Route path="/dars-e-quran/download" element={<DownloadDars />} />
+            <Route path="/dars-e-quran/complete" element={<CompleteDars />} />
             <Route path="/speeches" element={<Speeches />} />
             <Route path="/books" element={<Books />} />
             
@@ -49,6 +56,7 @@ const App = () => (
             <Route path="/admin/media" element={<AdminMedia />} />
             <Route path="/admin/comments" element={<AdminComments />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/dars-audio" element={<AdminDarsAudio />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -62,6 +62,48 @@ export type Database = {
           },
         ]
       }
+      dars_audio: {
+        Row: {
+          audio_url: string
+          category: string
+          created_at: string
+          description: string | null
+          duration: string | null
+          file_size: string | null
+          id: string
+          is_published: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audio_url: string
+          category: string
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          file_size?: string | null
+          id?: string
+          is_published?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          file_size?: string | null
+          id?: string
+          is_published?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hero_slides: {
         Row: {
           created_at: string
