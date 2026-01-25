@@ -49,16 +49,14 @@ interface Post {
   updated_at: string;
 }
 
-const categories = [
-  "Dars-e-Quran",
-  "Speeches",
-  "Books",
-  "Articles",
-  "Announcements",
-];
+interface Category {
+  id: string;
+  name: string;
+}
 
 export default function AdminPosts() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -75,17 +73,24 @@ export default function AdminPosts() {
   });
   const { toast } = useToast();
 
-  const fetchPosts = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const [postsRes, categoriesRes] = await Promise.all([
+        supabase
+          .from("posts")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("categories")
+          .select("id, name")
+          .order("sort_order", { ascending: true }),
+      ]);
 
-      if (error) throw error;
-      setPosts(data || []);
+      if (postsRes.error) throw postsRes.error;
+      setPosts(postsRes.data || []);
+      setCategories(categoriesRes.data || []);
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      console.error("Error fetching data:", error);
       toast({ title: "Error", description: "Failed to fetch posts", variant: "destructive" });
     } finally {
       setLoading(false);
@@ -93,7 +98,7 @@ export default function AdminPosts() {
   };
 
   useEffect(() => {
-    fetchPosts();
+    fetchData();
   }, []);
 
   const generateSlug = (title: string) => {
@@ -145,7 +150,7 @@ export default function AdminPosts() {
 
       setDialogOpen(false);
       resetForm();
-      fetchPosts();
+      fetchData();
     } catch (error: any) {
       console.error("Error saving post:", error);
       toast({
@@ -180,7 +185,7 @@ export default function AdminPosts() {
       const { error } = await supabase.from("posts").delete().eq("id", id);
       if (error) throw error;
       toast({ title: "Success", description: "Post deleted successfully" });
-      fetchPosts();
+      fetchData();
     } catch (error) {
       console.error("Error deleting post:", error);
       toast({ title: "Error", description: "Failed to delete post", variant: "destructive" });
@@ -257,8 +262,8 @@ export default function AdminPosts() {
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
+                          <SelectItem key={cat.id} value={cat.name}>
+                            {cat.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
