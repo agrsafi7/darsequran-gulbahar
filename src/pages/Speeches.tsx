@@ -1,41 +1,6 @@
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AdPlaceholder } from "@/components/shared/AdPlaceholder";
-
-const speeches = [
-  {
-    id: "1",
-    title: "The Importance of Seeking Knowledge",
-    speaker: "Sheikh Abdullah",
-    duration: "45 mins",
-    date: "2024-01-15",
-    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&q=80",
-  },
-  {
-    id: "2",
-    title: "Understanding Tawakkul (Trust in Allah)",
-    speaker: "Dr. Ahmad Hassan",
-    duration: "38 mins",
-    date: "2024-01-12",
-    image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&q=80",
-  },
-  {
-    id: "3",
-    title: "Building Strong Family Bonds in Islam",
-    speaker: "Ustaz Ibrahim",
-    duration: "52 mins",
-    date: "2024-01-10",
-    image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&q=80",
-  },
-  {
-    id: "4",
-    title: "The Beauty of Prayer",
-    speaker: "Sheikh Abdullah",
-    duration: "42 mins",
-    date: "2024-01-08",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-  },
-];
+import { CategoryPostsList } from "@/components/shared/CategoryPostsList";
+import { Mic } from "lucide-react";
 
 const Speeches = () => {
   return (
@@ -55,48 +20,16 @@ const Speeches = () => {
         </div>
       </section>
 
-      {/* Speeches Grid */}
+      {/* Speeches List */}
       <section className="py-16 lg:py-24">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {speeches.map((speech, index) => (
-                  <Card 
-                    key={speech.id} 
-                    className="card-elevated border-0 overflow-hidden animate-slide-up cursor-pointer group"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="aspect-video overflow-hidden">
-                      <img
-                        src={speech.image}
-                        alt={speech.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                        <span>{speech.duration}</span>
-                        <span>•</span>
-                        <span>{new Date(speech.date).toLocaleDateString()}</span>
-                      </div>
-                      <CardTitle className="font-heading text-lg group-hover:text-primary transition-colors line-clamp-2">
-                        {speech.title}
-                      </CardTitle>
-                      <CardDescription>{speech.speaker}</CardDescription>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24">
-                <AdPlaceholder size="vertical" label="Sidebar Ad" />
-              </div>
-            </div>
+          <div className="max-w-4xl mx-auto">
+            <CategoryPostsList
+              category="Speeches"
+              emptyIcon={<Mic className="w-8 h-8 text-primary-foreground" />}
+              emptyTitle="No Speeches Available"
+              emptyMessage="Check back soon for inspiring lectures and speeches."
+            />
           </div>
         </div>
       </section>

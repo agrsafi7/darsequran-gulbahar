@@ -1,0 +1,114 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText } from "lucide-react";
+
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  featured_image: string | null;
+  published_at: string | null;
+}
+
+interface CategoryPostsListProps {
+  category: string;
+  emptyIcon?: React.ReactNode;
+  emptyTitle?: string;
+  emptyMessage?: string;
+}
+
+export function CategoryPostsList({
+  category,
+  emptyIcon,
+  emptyTitle = "No Posts Available",
+  emptyMessage = "Check back soon for new content.",
+}: CategoryPostsListProps) {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("id, title, slug, excerpt, featured_image, published_at")
+        .eq("category", category)
+        .eq("status", "published")
+        .order("published_at", { ascending: false });
+
+      if (!error && data) {
+        setPosts(data);
+      }
+      setLoading(false);
+    };
+
+    fetchPosts();
+  }, [category]);
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-20 w-full rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <div className="w-16 h-16 rounded-2xl hero-gradient flex items-center justify-center mx-auto mb-4">
+          {emptyIcon || <FileText className="w-8 h-8 text-primary-foreground" />}
+        </div>
+        <h3 className="font-heading text-xl text-foreground mb-2">
+          {emptyTitle}
+        </h3>
+        <p className="text-muted-foreground">{emptyMessage}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {posts.map((post) => (
+        <Link
+          key={post.id}
+          to={`/post/${post.slug}`}
+          className="block p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors group"
+        >
+          <div className="flex items-start gap-4">
+            {post.featured_image && (
+              <img
+                src={post.featured_image}
+                alt={post.title}
+                className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                {post.title}
+              </h3>
+              {post.excerpt && (
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  {post.excerpt}
+                </p>
+              )}
+              {post.published_at && (
+                <span className="text-xs text-muted-foreground mt-2 block">
+                  {new Date(post.published_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
+              )}
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}

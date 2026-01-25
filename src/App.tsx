@@ -15,6 +15,7 @@ import Speeches from "./pages/Speeches";
 import Books from "./pages/Books";
 import Posts from "./pages/Posts";
 import PostDetail from "./pages/PostDetail";
+import PageDetail from "./pages/PageDetail";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminPages from "./pages/admin/Pages";
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/posts" element={<Posts />} />
             <Route path="/post/:slug" element={<PostDetail />} />
+            <Route path="/page/:slug" element={<PageDetail />} />
             <Route path="/dars-e-quran" element={<DarsEQuran />} />
             <Route path="/dars-e-quran/listen" element={<ListenOnline />} />
             <Route path="/dars-e-quran/download" element={<DownloadDars />} />
