@@ -1,40 +1,8 @@
-import { useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
-import { AudioPlayer } from "@/components/audio/AudioPlayer";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CategoryPostsList } from "@/components/shared/CategoryPostsList";
 import { Headphones } from "lucide-react";
 
-interface DarsAudio {
-  id: string;
-  title: string;
-  description: string | null;
-  audio_url: string;
-  duration: string | null;
-}
-
 const ListenOnline = () => {
-  const [audioList, setAudioList] = useState<DarsAudio[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchAudio = async () => {
-      const { data, error } = await supabase
-        .from("dars_audio")
-        .select("*")
-        .eq("category", "listen")
-        .eq("is_published", true)
-        .order("sort_order", { ascending: true });
-
-      if (!error && data) {
-        setAudioList(data);
-      }
-      setLoading(false);
-    };
-
-    fetchAudio();
-  }, []);
-
   return (
     <Layout>
       {/* Hero Section */}
@@ -60,35 +28,16 @@ const ListenOnline = () => {
         </div>
       </section>
 
-      {/* Audio List Section */}
+      {/* Posts List Section */}
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-4">
-            {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 w-full rounded-xl" />
-              ))
-            ) : audioList.length > 0 ? (
-              audioList.map((audio) => (
-                <AudioPlayer
-                  key={audio.id}
-                  src={audio.audio_url}
-                  title={audio.title}
-                />
-              ))
-            ) : (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 rounded-2xl hero-gradient flex items-center justify-center mx-auto mb-4">
-                  <Headphones className="w-8 h-8 text-primary-foreground" />
-                </div>
-                <h3 className="font-heading text-xl text-foreground mb-2">
-                  No Audio Available
-                </h3>
-                <p className="text-muted-foreground">
-                  Check back soon for new Quran lessons.
-                </p>
-              </div>
-            )}
+          <div className="max-w-4xl mx-auto">
+            <CategoryPostsList
+              category="Listen Online"
+              emptyIcon={<Headphones className="w-8 h-8 text-primary-foreground" />}
+              emptyTitle="No Audio Available"
+              emptyMessage="Check back soon for new Quran lessons."
+            />
           </div>
         </div>
       </section>
