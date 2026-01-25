@@ -4,6 +4,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlaylistEmbed } from "@/components/shared/PlaylistEmbed";
+import { ArchiveDownloadList } from "@/components/shared/ArchiveDownloadList";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -15,6 +16,7 @@ interface Post {
   excerpt: string | null;
   featured_image: string | null;
   playlist_embed_url: string | null;
+  archive_item_id: string | null;
   category: string | null;
   published_at: string | null;
   created_at: string;
@@ -147,6 +149,13 @@ export default function PostDetail() {
         {post.playlist_embed_url && (
           <div className="mb-8">
             <PlaylistEmbed url={post.playlist_embed_url} />
+          </div>
+        )}
+
+        {/* Archive.org Download List */}
+        {post.archive_item_id && (
+          <div className="mb-8">
+            <ArchiveDownloadList itemId={post.archive_item_id} />
           </div>
         )}
 

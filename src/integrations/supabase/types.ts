@@ -326,6 +326,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          archive_item_id: string | null
           category: string | null
           comments_enabled: boolean
           content: string | null
@@ -342,6 +343,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archive_item_id?: string | null
           category?: string | null
           comments_enabled?: boolean
           content?: string | null
@@ -358,6 +360,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archive_item_id?: string | null
           category?: string | null
           comments_enabled?: boolean
           content?: string | null
