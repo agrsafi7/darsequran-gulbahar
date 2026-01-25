@@ -45,15 +45,27 @@ export function PlaylistEmbed({ url }: PlaylistEmbedProps) {
     
     // Archive.org
     if (url.includes("archive.org")) {
-      // Extract item identifier from URLs like:
+      // Extract item identifier and preserve query parameters from URLs like:
       // https://archive.org/details/item-id
       // https://archive.org/embed/item-id
-      const detailsMatch = url.match(/archive\.org\/(?:details|embed)\/([^/?#]+)/);
+      // https://archive.org/embed/item-id&playlist=1
+      const detailsMatch = url.match(/archive\.org\/(?:details|embed)\/([^/?#&]+)/);
       if (detailsMatch) {
         const itemId = detailsMatch[1];
+        // Extract query parameters (both ? and & style)
+        let queryParams = "";
+        const queryMatch = url.match(/[?&](playlist=\d+)/);
+        if (queryMatch) {
+          queryParams = `&${queryMatch[1]}`;
+        }
+        // Also check for other common parameters
+        const autoplayMatch = url.match(/[?&](autoplay=\d+)/);
+        if (autoplayMatch) {
+          queryParams += `&${autoplayMatch[1]}`;
+        }
         return {
           type: "archive",
-          embedUrl: `https://archive.org/embed/${itemId}`,
+          embedUrl: `https://archive.org/embed/${itemId}${queryParams}`,
         };
       }
     }
