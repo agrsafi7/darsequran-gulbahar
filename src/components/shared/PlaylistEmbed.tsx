@@ -141,11 +141,12 @@ export function PlaylistEmbed({ url }: PlaylistEmbedProps) {
         <iframe
           src={embedInfo.embedUrl}
           className="w-full"
-          height="400"
+          height="500"
           frameBorder="0"
           allow="autoplay"
+          allowFullScreen
           loading="lazy"
-          title="Archive.org Media"
+          title="Archive.org Playlist"
         />
       </div>
     );
