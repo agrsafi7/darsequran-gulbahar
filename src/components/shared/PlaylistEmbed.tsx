@@ -43,6 +43,21 @@ export function PlaylistEmbed({ url }: PlaylistEmbedProps) {
       return { type: "spotify", embedUrl: spotifyUrl };
     }
     
+    // Archive.org
+    if (url.includes("archive.org")) {
+      // Extract item identifier from URLs like:
+      // https://archive.org/details/item-id
+      // https://archive.org/embed/item-id
+      const detailsMatch = url.match(/archive\.org\/(?:details|embed)\/([^/?#]+)/);
+      if (detailsMatch) {
+        const itemId = detailsMatch[1];
+        return {
+          type: "archive",
+          embedUrl: `https://archive.org/embed/${itemId}`,
+        };
+      }
+    }
+    
     return null;
   }, [url]);
 
@@ -103,6 +118,22 @@ export function PlaylistEmbed({ url }: PlaylistEmbedProps) {
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           loading="lazy"
           title="Spotify Playlist"
+        />
+      </div>
+    );
+  }
+
+  if (embedInfo.type === "archive") {
+    return (
+      <div className="rounded-lg overflow-hidden">
+        <iframe
+          src={embedInfo.embedUrl}
+          className="w-full"
+          height="400"
+          frameBorder="0"
+          allow="autoplay"
+          loading="lazy"
+          title="Archive.org Media"
         />
       </div>
     );
