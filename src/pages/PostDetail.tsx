@@ -20,6 +20,15 @@ interface Post {
   created_at: string;
 }
 
+// Map categories to their respective URLs and labels
+const categoryRoutes: Record<string, { url: string; label: string }> = {
+  "Listen Online": { url: "/dars-e-quran/listen", label: "Listen Online" },
+  "Download": { url: "/dars-e-quran/download", label: "Download Dars" },
+  "Complete Dars": { url: "/dars-e-quran/complete", label: "Complete Dars" },
+  "Speeches": { url: "/speeches", label: "Speeches" },
+  "Books": { url: "/books", label: "Books" },
+};
+
 export default function PostDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<Post | null>(null);
@@ -78,6 +87,11 @@ export default function PostDetail() {
     );
   }
 
+  // Get the back route based on category
+  const backRoute = post.category && categoryRoutes[post.category]
+    ? categoryRoutes[post.category]
+    : { url: "/posts", label: "Posts" };
+
   const publishedDate = post.published_at
     ? new Date(post.published_at).toLocaleDateString("en-US", {
         year: "numeric",
@@ -91,9 +105,9 @@ export default function PostDetail() {
       <article className="container py-12 max-w-3xl mx-auto">
         {/* Back button */}
         <Button variant="ghost" asChild className="mb-6">
-          <Link to="/posts">
+          <Link to={backRoute.url}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Posts
+            Back to {backRoute.label}
           </Link>
         </Button>
 
