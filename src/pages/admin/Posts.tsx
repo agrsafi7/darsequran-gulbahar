@@ -67,6 +67,7 @@ export default function AdminPosts() {
     content: "",
     excerpt: "",
     featured_image: "",
+    playlist_embed_url: "",
     category: "",
     status: "draft",
     comments_enabled: true,
@@ -127,6 +128,7 @@ export default function AdminPosts() {
         content: formData.content,
         excerpt: formData.excerpt,
         featured_image: formData.featured_image || null,
+        playlist_embed_url: formData.playlist_embed_url || null,
         category: formData.category || null,
         status: formData.status,
         comments_enabled: formData.comments_enabled,
@@ -163,7 +165,7 @@ export default function AdminPosts() {
     }
   };
 
-  const handleEdit = (post: Post) => {
+  const handleEdit = (post: Post & { playlist_embed_url?: string | null }) => {
     setEditingPost(post);
     setFormData({
       title: post.title,
@@ -171,6 +173,7 @@ export default function AdminPosts() {
       content: post.content || "",
       excerpt: post.excerpt || "",
       featured_image: post.featured_image || "",
+      playlist_embed_url: post.playlist_embed_url || "",
       category: post.category || "",
       status: post.status,
       comments_enabled: post.comments_enabled,
@@ -200,6 +203,7 @@ export default function AdminPosts() {
       content: "",
       excerpt: "",
       featured_image: "",
+      playlist_embed_url: "",
       category: "",
       status: "draft",
       comments_enabled: true,
@@ -300,6 +304,23 @@ export default function AdminPosts() {
                     }
                     placeholder="https://..."
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="playlist_embed_url">Playlist Embed URL (Optional)</Label>
+                  <Input
+                    id="playlist_embed_url"
+                    value={formData.playlist_embed_url}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        playlist_embed_url: e.target.value,
+                      }))
+                    }
+                    placeholder="https://soundcloud.com/... or YouTube playlist URL"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Add a SoundCloud, YouTube, or Spotify playlist URL to embed in the post.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="excerpt">Excerpt</Label>
