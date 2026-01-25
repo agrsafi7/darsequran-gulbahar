@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_email: string
@@ -72,6 +102,7 @@ export type Database = {
           file_size: string | null
           id: string
           is_published: boolean
+          playlist_id: string | null
           sort_order: number
           title: string
           updated_at: string
@@ -85,6 +116,7 @@ export type Database = {
           file_size?: string | null
           id?: string
           is_published?: boolean
+          playlist_id?: string | null
           sort_order?: number
           title: string
           updated_at?: string
@@ -96,6 +128,48 @@ export type Database = {
           description?: string | null
           duration?: string | null
           file_size?: string | null
+          id?: string
+          is_published?: boolean
+          playlist_id?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dars_audio_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "dars_playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dars_playlists: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
           id?: string
           is_published?: boolean
           sort_order?: number

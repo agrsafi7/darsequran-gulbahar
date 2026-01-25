@@ -13,10 +13,13 @@ import DownloadDars from "./pages/dars/DownloadDars";
 import CompleteDars from "./pages/dars/CompleteDars";
 import Speeches from "./pages/Speeches";
 import Books from "./pages/Books";
+import Posts from "./pages/Posts";
+import PostDetail from "./pages/PostDetail";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminPages from "./pages/admin/Pages";
 import AdminPosts from "./pages/admin/Posts";
+import AdminCategories from "./pages/admin/Categories";
 import AdminNavigation from "./pages/admin/Navigation";
 import AdminMedia from "./pages/admin/Media";
 import AdminComments from "./pages/admin/Comments";
@@ -39,6 +42,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/posts" element={<Posts />} />
+            <Route path="/post/:slug" element={<PostDetail />} />
             <Route path="/dars-e-quran" element={<DarsEQuran />} />
             <Route path="/dars-e-quran/listen" element={<ListenOnline />} />
             <Route path="/dars-e-quran/download" element={<DownloadDars />} />
@@ -51,6 +56,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/pages" element={<AdminPages />} />
             <Route path="/admin/posts" element={<AdminPosts />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
             <Route path="/admin/hero-slides" element={<AdminHeroSlides />} />
             <Route path="/admin/navigation" element={<AdminNavigation />} />
             <Route path="/admin/media" element={<AdminMedia />} />
