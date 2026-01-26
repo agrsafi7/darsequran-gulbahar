@@ -1,34 +1,22 @@
 import { Layout } from "@/components/layout/Layout";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Headphones, Download, FileAudio } from "lucide-react";
+import { Headphones, Download, FileAudio, BookOpen, Mic, Video } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const categories = [
-  {
-    title: "Listen Online Dars",
-    description: "Stream Quran lessons directly in your browser. Access our complete library of audio recordings.",
-    href: "/dars-e-quran/listen",
-    icon: Headphones,
-  },
-  {
-    title: "Download Dars",
-    description: "Download individual lessons to listen offline. Perfect for learning on the go.",
-    href: "/dars-e-quran/download",
-    icon: Download,
-  },
-  {
-    title: "Complete Dars (Single File)",
-    description: "Download complete compilations as single files for uninterrupted listening experience.",
-    href: "/dars-e-quran/complete",
-    icon: FileAudio,
-  },
-];
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Headphones,
+  Download,
+  FileAudio,
+  BookOpen,
+  Mic,
+  Video,
+};
 
 const DarsEQuran = () => {
-  const { data: page, isLoading } = useQuery({
+  const { data: page, isLoading: pageLoading } = useQuery({
     queryKey: ["page", "dars-e-quran"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,6 +25,20 @@ const DarsEQuran = () => {
         .eq("slug", "dars-e-quran")
         .eq("status", "published")
         .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["dars-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dars_categories")
+        .select("*")
+        .eq("is_visible", true)
+        .order("sort_order", { ascending: true });
 
       if (error) throw error;
       return data;
@@ -60,7 +62,7 @@ const DarsEQuran = () => {
         <div className="absolute inset-0 pattern-bg opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
-            {isLoading ? (
+            {pageLoading ? (
               <>
                 <Skeleton className="h-14 w-64 mb-6 bg-primary-foreground/20" />
                 <Skeleton className="h-8 w-full max-w-xl bg-primary-foreground/20" />
@@ -91,30 +93,47 @@ const DarsEQuran = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {categories.map((category, index) => (
-              <Link key={category.title} to={category.href} className="group">
-                <Card 
-                  className="card-elevated h-full border-0 text-center animate-slide-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <CardHeader>
-                    <div className="w-16 h-16 rounded-2xl hero-gradient flex items-center justify-center mx-auto mb-4 group-hover:shadow-gold transition-shadow">
-                      <category.icon className="w-8 h-8 text-primary-foreground" />
-                    </div>
-                    <CardTitle className="font-heading text-xl group-hover:text-primary transition-colors">
-                      {category.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      {category.description}
-                    </p>
-                  </CardContent>
+          {categoriesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="h-64 animate-pulse">
+                  <CardContent />
                 </Card>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : categories.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No categories available yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {categories.map((category, index) => {
+                const IconComponent = iconMap[category.icon] || Headphones;
+                return (
+                  <Link key={category.id} to={category.href} className="group">
+                    <Card 
+                      className="card-elevated h-full border-0 text-center animate-slide-up"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <CardHeader>
+                        <div className="w-16 h-16 rounded-2xl hero-gradient flex items-center justify-center mx-auto mb-4 group-hover:shadow-gold transition-shadow">
+                          <IconComponent className="w-8 h-8 text-primary-foreground" />
+                        </div>
+                        <CardTitle className="font-heading text-xl group-hover:text-primary transition-colors">
+                          {category.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-muted-foreground">
+                          {category.description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </Layout>

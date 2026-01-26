@@ -145,6 +145,42 @@ export type Database = {
           },
         ]
       }
+      dars_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          href: string
+          icon: string
+          id: string
+          is_visible: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          href: string
+          icon?: string
+          id?: string
+          is_visible?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          href?: string
+          icon?: string
+          id?: string
+          is_visible?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dars_playlists: {
         Row: {
           category: string
