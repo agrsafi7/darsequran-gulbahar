@@ -180,6 +180,10 @@ export type Database = {
       }
       hero_slides: {
         Row: {
+          button1_text: string | null
+          button1_url: string | null
+          button2_text: string | null
+          button2_url: string | null
           created_at: string
           heading: string | null
           id: string
@@ -190,6 +194,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          button1_text?: string | null
+          button1_url?: string | null
+          button2_text?: string | null
+          button2_url?: string | null
           created_at?: string
           heading?: string | null
           id?: string
@@ -200,6 +208,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          button1_text?: string | null
+          button1_url?: string | null
+          button2_text?: string | null
+          button2_url?: string | null
           created_at?: string
           heading?: string | null
           id?: string
