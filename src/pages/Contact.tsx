@@ -13,26 +13,61 @@ interface Page {
   meta_description: string | null;
 }
 
+interface ContactSettings {
+  address: string;
+  phone: string;
+  email: string;
+  hours: string;
+}
+
 const Contact = () => {
   const [page, setPage] = useState<Page | null>(null);
+  const [contactInfo, setContactInfo] = useState<ContactSettings>({
+    address: "",
+    phone: "",
+    email: "",
+    hours: "",
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchPage();
+    fetchData();
   }, []);
 
-  const fetchPage = async () => {
+  const fetchData = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("pages")
-      .select("*")
-      .eq("slug", "contact")
-      .eq("status", "published")
-      .maybeSingle();
+    
+    // Fetch page content and contact settings in parallel
+    const [pageResult, settingsResult] = await Promise.all([
+      supabase
+        .from("pages")
+        .select("*")
+        .eq("slug", "contact")
+        .eq("status", "published")
+        .maybeSingle(),
+      supabase
+        .from("site_settings")
+        .select("key, value")
+        .in("key", ["contact_address", "contact_phone", "contact_email", "contact_hours"])
+    ]);
 
-    if (!error && data) {
-      setPage(data);
+    if (!pageResult.error && pageResult.data) {
+      setPage(pageResult.data);
     }
+
+    if (!settingsResult.error && settingsResult.data) {
+      const settingsMap: Record<string, string> = {};
+      settingsResult.data.forEach((item) => {
+        settingsMap[item.key] = item.value || "";
+      });
+      setContactInfo({
+        address: settingsMap.contact_address || "",
+        phone: settingsMap.contact_phone || "",
+        email: settingsMap.contact_email || "",
+        hours: settingsMap.contact_hours || "",
+      });
+    }
+    
     setLoading(false);
   };
 
@@ -93,9 +128,8 @@ const Contact = () => {
                     <CardTitle className="text-lg">Address</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-sm">
-                      123 Islamic Center Road<br />
-                      City, Country 12345
+                    <p className="text-muted-foreground text-sm whitespace-pre-line">
+                      {contactInfo.address || "Address not set"}
                     </p>
                   </CardContent>
                 </Card>
@@ -108,9 +142,8 @@ const Contact = () => {
                     <CardTitle className="text-lg">Phone</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-sm">
-                      +1 (234) 567-8900<br />
-                      +1 (234) 567-8901
+                    <p className="text-muted-foreground text-sm whitespace-pre-line">
+                      {contactInfo.phone || "Phone not set"}
                     </p>
                   </CardContent>
                 </Card>
@@ -123,9 +156,8 @@ const Contact = () => {
                     <CardTitle className="text-lg">Email</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-sm">
-                      info@example.com<br />
-                      support@example.com
+                    <p className="text-muted-foreground text-sm whitespace-pre-line">
+                      {contactInfo.email || "Email not set"}
                     </p>
                   </CardContent>
                 </Card>
@@ -138,9 +170,8 @@ const Contact = () => {
                     <CardTitle className="text-lg">Hours</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-sm">
-                      Mon - Fri: 9am - 6pm<br />
-                      Sat - Sun: 10am - 4pm
+                    <p className="text-muted-foreground text-sm whitespace-pre-line">
+                      {contactInfo.hours || "Hours not set"}
                     </p>
                   </CardContent>
                 </Card>
