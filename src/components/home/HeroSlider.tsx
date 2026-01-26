@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 interface Slide {
   id: string;
@@ -130,15 +131,17 @@ export function HeroSlider() {
                 <Button 
                   size="lg" 
                   className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-gold"
+                  asChild
                 >
-                  Explore Dars-e-Quran
+                  <Link to="/dars-e-quran">Explore Dars-e-Quran</Link>
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline" 
                   className="border-white/50 text-white bg-transparent hover:bg-white/10 backdrop-blur-sm"
+                  asChild
                 >
-                  Learn More
+                  <Link to="/about">Learn More</Link>
                 </Button>
               </div>
             </div>
