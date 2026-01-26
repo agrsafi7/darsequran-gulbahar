@@ -37,6 +37,10 @@ interface HeroSlide {
   image_url: string;
   heading: string | null;
   subtext: string | null;
+  button1_text: string | null;
+  button1_url: string | null;
+  button2_text: string | null;
+  button2_url: string | null;
   sort_order: number;
   is_active: boolean;
   created_at: string;
@@ -54,6 +58,10 @@ export default function HeroSlides() {
     image_url: "",
     heading: "",
     subtext: "",
+    button1_text: "Explore Dars-e-Quran",
+    button1_url: "/dars-e-quran",
+    button2_text: "Learn More",
+    button2_url: "/about",
     is_active: true,
   });
 
@@ -87,6 +95,10 @@ export default function HeroSlides() {
       image_url: "",
       heading: "",
       subtext: "",
+      button1_text: "Explore Dars-e-Quran",
+      button1_url: "/dars-e-quran",
+      button2_text: "Learn More",
+      button2_url: "/about",
       is_active: true,
     });
     setEditingSlide(null);
@@ -98,6 +110,10 @@ export default function HeroSlides() {
       image_url: slide.image_url,
       heading: slide.heading || "",
       subtext: slide.subtext || "",
+      button1_text: slide.button1_text || "Explore Dars-e-Quran",
+      button1_url: slide.button1_url || "/dars-e-quran",
+      button2_text: slide.button2_text || "Learn More",
+      button2_url: slide.button2_url || "/about",
       is_active: slide.is_active,
     });
     setIsDialogOpen(true);
@@ -135,6 +151,10 @@ export default function HeroSlides() {
             image_url: formData.image_url,
             heading: formData.heading || null,
             subtext: formData.subtext || null,
+            button1_text: formData.button1_text || null,
+            button1_url: formData.button1_url || null,
+            button2_text: formData.button2_text || null,
+            button2_url: formData.button2_url || null,
             is_active: formData.is_active,
           })
           .eq("id", editingSlide.id);
@@ -150,6 +170,10 @@ export default function HeroSlides() {
           image_url: formData.image_url,
           heading: formData.heading || null,
           subtext: formData.subtext || null,
+          button1_text: formData.button1_text || null,
+          button1_url: formData.button1_url || null,
+          button2_text: formData.button2_text || null,
+          button2_url: formData.button2_url || null,
           is_active: formData.is_active,
           sort_order: maxOrder,
         });
@@ -293,6 +317,54 @@ export default function HeroSlides() {
                       placeholder="Enter slide subtext"
                       rows={3}
                     />
+                  </div>
+
+                  <div className="border-t pt-4 mt-4">
+                    <p className="text-sm font-medium mb-3">Button 1 (Primary)</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="button1_text">Button Text</Label>
+                        <Input
+                          id="button1_text"
+                          value={formData.button1_text}
+                          onChange={(e) => setFormData({ ...formData, button1_text: e.target.value })}
+                          placeholder="Explore Dars-e-Quran"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="button1_url">Button URL</Label>
+                        <Input
+                          id="button1_url"
+                          value={formData.button1_url}
+                          onChange={(e) => setFormData({ ...formData, button1_url: e.target.value })}
+                          placeholder="/dars-e-quran"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <p className="text-sm font-medium mb-3">Button 2 (Secondary)</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="button2_text">Button Text</Label>
+                        <Input
+                          id="button2_text"
+                          value={formData.button2_text}
+                          onChange={(e) => setFormData({ ...formData, button2_text: e.target.value })}
+                          placeholder="Learn More"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="button2_url">Button URL</Label>
+                        <Input
+                          id="button2_url"
+                          value={formData.button2_url}
+                          onChange={(e) => setFormData({ ...formData, button2_url: e.target.value })}
+                          placeholder="/about"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex items-center space-x-2">

@@ -11,6 +11,10 @@ interface Slide {
   image_url: string;
   heading: string | null;
   subtext: string | null;
+  button1_text: string | null;
+  button1_url: string | null;
+  button2_text: string | null;
+  button2_url: string | null;
 }
 
 // Demo slides - used when database is empty or unavailable
@@ -20,18 +24,30 @@ const demoSlides: Slide[] = [
     image_url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=1920&q=80",
     heading: "Discover the Beauty of Quranic Wisdom",
     subtext: "Join our comprehensive Dars-e-Quran sessions and deepen your understanding",
+    button1_text: "Explore Dars-e-Quran",
+    button1_url: "/dars-e-quran",
+    button2_text: "Learn More",
+    button2_url: "/about",
   },
   {
     id: "2",
     image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=1920&q=80",
     heading: "Learn from Authentic Scholars",
     subtext: "Access centuries of Islamic knowledge through our curated lectures and speeches",
+    button1_text: "Explore Dars-e-Quran",
+    button1_url: "/dars-e-quran",
+    button2_text: "Learn More",
+    button2_url: "/about",
   },
   {
     id: "3",
     image_url: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=1920&q=80",
     heading: "A Journey of Spiritual Growth",
     subtext: "Explore our library of Islamic books and educational resources",
+    button1_text: "Explore Dars-e-Quran",
+    button1_url: "/dars-e-quran",
+    button2_text: "Learn More",
+    button2_url: "/about",
   },
 ];
 
@@ -127,22 +143,26 @@ export function HeroSlider() {
                   {slide.subtext}
                 </p>
               )}
-              <div className="mt-8 flex gap-4">
-                <Button 
-                  size="lg" 
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-gold"
-                  asChild
-                >
-                  <Link to="/dars-e-quran">Explore Dars-e-Quran</Link>
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-white/50 text-white bg-transparent hover:bg-white/10 backdrop-blur-sm"
-                  asChild
-                >
-                  <Link to="/about">Learn More</Link>
-                </Button>
+              <div className="mt-8 flex flex-wrap gap-4">
+                {slide.button1_text && slide.button1_url && (
+                  <Button 
+                    size="lg" 
+                    className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold shadow-gold"
+                    asChild
+                  >
+                    <Link to={slide.button1_url}>{slide.button1_text}</Link>
+                  </Button>
+                )}
+                {slide.button2_text && slide.button2_url && (
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="border-white/50 text-white bg-transparent hover:bg-white/10 backdrop-blur-sm"
+                    asChild
+                  >
+                    <Link to={slide.button2_url}>{slide.button2_text}</Link>
+                  </Button>
+                )}
               </div>
             </div>
           </div>
