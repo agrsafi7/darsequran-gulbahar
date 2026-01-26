@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Newspaper, MessageSquare, Image, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FileText, Newspaper, MessageSquare, Image, Eye, ExternalLink, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Stats {
@@ -11,18 +13,29 @@ interface Stats {
   media: number;
 }
 
+interface NavigationItem {
+  id: string;
+  title: string;
+  url: string;
+  parent_id: string | null;
+  sort_order: number;
+  is_visible: boolean;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({ pages: 0, posts: 0, comments: 0, media: 0 });
+  const [navItems, setNavItems] = useState<NavigationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const [pagesRes, postsRes, commentsRes, mediaRes] = await Promise.all([
+        const [pagesRes, postsRes, commentsRes, mediaRes, navRes] = await Promise.all([
           supabase.from("pages").select("id", { count: "exact", head: true }),
           supabase.from("posts").select("id", { count: "exact", head: true }),
           supabase.from("comments").select("id", { count: "exact", head: true }),
           supabase.from("media_library").select("id", { count: "exact", head: true }),
+          supabase.from("navigation_items").select("*").order("sort_order", { ascending: true }),
         ]);
 
         setStats({
@@ -31,14 +44,16 @@ export default function AdminDashboard() {
           comments: commentsRes.count ?? 0,
           media: mediaRes.count ?? 0,
         });
+
+        setNavItems(navRes.data || []);
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
+    fetchData();
   }, []);
 
   const statCards = [
@@ -47,6 +62,23 @@ export default function AdminDashboard() {
     { title: "Comments", value: stats.comments, icon: MessageSquare, color: "text-yellow-500" },
     { title: "Media Files", value: stats.media, icon: Image, color: "text-purple-500" },
   ];
+
+  // Get parent items and their children
+  const parentItems = navItems.filter((item) => !item.parent_id);
+  const getChildren = (parentId: string) => navItems.filter((item) => item.parent_id === parentId);
+
+  // Determine where to link based on URL pattern
+  const getEditLink = (url: string) => {
+    if (url === "/" || url === "/about" || url === "/contact") {
+      // These are static pages - link to Pages admin
+      return "/admin/pages";
+    }
+    if (url.startsWith("/dars-e-quran") || url === "/speeches" || url === "/books") {
+      // These are category-based pages showing posts
+      return "/admin/posts";
+    }
+    return "/admin/pages";
+  };
 
   return (
     <AdminLayout title="Dashboard">
@@ -73,6 +105,65 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
+                <ExternalLink className="h-5 w-5" />
+                Quick Edit: Menu Pages
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : navItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No navigation items found. <Link to="/admin/navigation" className="text-primary underline">Add navigation items</Link>
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {parentItems.map((item) => {
+                    const children = getChildren(item.id);
+                    return (
+                      <div key={item.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{item.title}</span>
+                          <Button asChild size="sm" variant="outline">
+                            <Link to={getEditLink(item.url)}>
+                              Edit Content
+                            </Link>
+                          </Button>
+                        </div>
+                        {children.length > 0 && (
+                          <div className="ml-4 space-y-2 border-l-2 border-muted pl-4">
+                            {children.map((child) => (
+                              <div key={child.id} className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">{child.title}</span>
+                                <Button asChild size="sm" variant="ghost">
+                                  <Link to={getEditLink(child.url)}>
+                                    Edit
+                                  </Link>
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <div className="pt-2 border-t">
+                    <Button asChild variant="link" className="px-0">
+                      <Link to="/admin/navigation">
+                        Manage Navigation Menu →
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5" />
                 Quick Actions
               </CardTitle>
@@ -89,17 +180,6 @@ export default function AdminDashboard() {
                 <li>• <strong>Comments:</strong> Moderate user comments</li>
                 <li>• <strong>Settings:</strong> Configure site options</li>
               </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                No recent activity to display.
-              </p>
             </CardContent>
           </Card>
         </div>
