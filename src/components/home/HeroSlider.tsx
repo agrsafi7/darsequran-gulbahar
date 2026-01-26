@@ -136,7 +136,7 @@ export function HeroSlider() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/10 backdrop-blur-sm"
+                  className="border-white/50 text-white bg-transparent hover:bg-white/10 backdrop-blur-sm"
                 >
                   Learn More
                 </Button>
