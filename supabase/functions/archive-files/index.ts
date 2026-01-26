@@ -84,16 +84,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Find VBR MP3 ZIP file
-    const zipFile = data.result.find((file: ArchiveFile) => 
-      file.format === 'VBR ZIP'
-    );
-    if (zipFile) {
+    // Add ZIP download using Archive.org's compress endpoint (like the "68 files" button)
+    if (files.length > 0) {
       bulkDownloads.push({
         type: 'zip',
-        name: zipFile.name,
-        size: zipFile.size,
-        downloadUrl: `https://archive.org/download/${itemId}/${encodeURIComponent(zipFile.name)}`,
+        name: `${itemId}_vbr_mp3.zip`,
+        size: undefined, // Size is dynamic
+        downloadUrl: `https://archive.org/compress/${itemId}/formats=VBR%20MP3`,
       });
     }
 
