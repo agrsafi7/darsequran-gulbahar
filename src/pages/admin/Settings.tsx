@@ -15,6 +15,10 @@ interface SiteSettings {
   site_description: string;
   comments_enabled: string;
   ga_measurement_id: string;
+  contact_address: string;
+  contact_phone: string;
+  contact_email: string;
+  contact_hours: string;
 }
 
 export default function AdminSettings() {
@@ -23,6 +27,10 @@ export default function AdminSettings() {
     site_description: "",
     comments_enabled: "true",
     ga_measurement_id: "",
+    contact_address: "",
+    contact_phone: "",
+    contact_email: "",
+    contact_hours: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -46,6 +54,10 @@ export default function AdminSettings() {
         site_description: settingsMap.site_description || "",
         comments_enabled: settingsMap.comments_enabled || "true",
         ga_measurement_id: settingsMap.ga_measurement_id || "",
+        contact_address: settingsMap.contact_address || "",
+        contact_phone: settingsMap.contact_phone || "",
+        contact_email: settingsMap.contact_email || "",
+        contact_hours: settingsMap.contact_hours || "",
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -169,6 +181,77 @@ export default function AdminSettings() {
             <p className="text-sm text-muted-foreground mt-2">
               When disabled, comments will be hidden on all posts regardless of individual post settings.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Contact Information</CardTitle>
+            <CardDescription>
+              Configure contact details shown on the Contact Us page
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact_address">Address</Label>
+              <Textarea
+                id="contact_address"
+                value={settings.contact_address}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    contact_address: e.target.value,
+                  }))
+                }
+                placeholder="123 Street Name, City, Country"
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact_phone">Phone Numbers</Label>
+              <Textarea
+                id="contact_phone"
+                value={settings.contact_phone}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    contact_phone: e.target.value,
+                  }))
+                }
+                placeholder="+1 234 567 890 (one per line)"
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact_email">Email Addresses</Label>
+              <Textarea
+                id="contact_email"
+                value={settings.contact_email}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    contact_email: e.target.value,
+                  }))
+                }
+                placeholder="info@example.com (one per line)"
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact_hours">Office Hours</Label>
+              <Textarea
+                id="contact_hours"
+                value={settings.contact_hours}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    contact_hours: e.target.value,
+                  }))
+                }
+                placeholder="Mon - Fri: 9am - 6pm (one per line)"
+                rows={2}
+              />
+            </div>
           </CardContent>
         </Card>
 
