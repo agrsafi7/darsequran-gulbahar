@@ -11,6 +11,7 @@ import DarsEQuran from "./pages/DarsEQuran";
 import ListenOnline from "./pages/dars/ListenOnline";
 import DownloadDars from "./pages/dars/DownloadDars";
 import CompleteDars from "./pages/dars/CompleteDars";
+import ScholarPage from "./pages/dars/ScholarPage";
 import Speeches from "./pages/Speeches";
 import Books from "./pages/Books";
 import Posts from "./pages/Posts";
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/dars-e-quran/listen" element={<ListenOnline />} />
             <Route path="/dars-e-quran/download" element={<DownloadDars />} />
             <Route path="/dars-e-quran/complete" element={<CompleteDars />} />
+            <Route path="/dars-e-quran/:slug" element={<ScholarPage />} />
             <Route path="/speeches" element={<Speeches />} />
             <Route path="/books" element={<Books />} />
             
