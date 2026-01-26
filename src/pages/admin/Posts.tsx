@@ -68,6 +68,7 @@ export default function AdminPosts() {
     excerpt: "",
     featured_image: "",
     playlist_embed_url: "",
+    archive_item_id: "",
     category: "",
     status: "draft",
     comments_enabled: true,
@@ -129,6 +130,7 @@ export default function AdminPosts() {
         excerpt: formData.excerpt,
         featured_image: formData.featured_image || null,
         playlist_embed_url: formData.playlist_embed_url || null,
+        archive_item_id: formData.archive_item_id || null,
         category: formData.category || null,
         status: formData.status,
         comments_enabled: formData.comments_enabled,
@@ -165,7 +167,7 @@ export default function AdminPosts() {
     }
   };
 
-  const handleEdit = (post: Post & { playlist_embed_url?: string | null }) => {
+  const handleEdit = (post: Post & { playlist_embed_url?: string | null; archive_item_id?: string | null }) => {
     setEditingPost(post);
     setFormData({
       title: post.title,
@@ -174,6 +176,7 @@ export default function AdminPosts() {
       excerpt: post.excerpt || "",
       featured_image: post.featured_image || "",
       playlist_embed_url: post.playlist_embed_url || "",
+      archive_item_id: post.archive_item_id || "",
       category: post.category || "",
       status: post.status,
       comments_enabled: post.comments_enabled,
@@ -204,6 +207,7 @@ export default function AdminPosts() {
       excerpt: "",
       featured_image: "",
       playlist_embed_url: "",
+      archive_item_id: "",
       category: "",
       status: "draft",
       comments_enabled: true,
@@ -320,6 +324,23 @@ export default function AdminPosts() {
                   />
                   <p className="text-xs text-muted-foreground">
                     Add a SoundCloud, YouTube, or Spotify playlist URL to embed in the post.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="archive_item_id">Archive.org Item ID (Optional)</Label>
+                  <Input
+                    id="archive_item_id"
+                    value={formData.archive_item_id}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        archive_item_id: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g., DoraTafseer2007"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter the Archive.org item ID to display playlist, download list, and bulk download options.
                   </p>
                 </div>
                 <div className="space-y-2">
