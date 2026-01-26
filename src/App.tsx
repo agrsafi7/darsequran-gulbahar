@@ -26,6 +26,7 @@ import AdminMedia from "./pages/admin/Media";
 import AdminComments from "./pages/admin/Comments";
 import AdminSettings from "./pages/admin/Settings";
 import AdminHeroSlides from "./pages/admin/HeroSlides";
+import AdminDarsCategories from "./pages/admin/DarsCategories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/admin/posts" element={<AdminPosts />} />
             <Route path="/admin/categories" element={<AdminCategories />} />
             <Route path="/admin/hero-slides" element={<AdminHeroSlides />} />
+            <Route path="/admin/dars-categories" element={<AdminDarsCategories />} />
             <Route path="/admin/navigation" element={<AdminNavigation />} />
             <Route path="/admin/media" element={<AdminMedia />} />
             <Route path="/admin/comments" element={<AdminComments />} />
