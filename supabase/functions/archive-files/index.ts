@@ -13,6 +13,13 @@ interface ArchiveFile {
   track?: string;
 }
 
+interface BulkDownload {
+  type: 'torrent' | 'zip';
+  name: string;
+  size?: string;
+  downloadUrl: string;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -44,7 +51,7 @@ Deno.serve(async (req) => {
     const data = await response.json();
     
     // Filter files by format (default: VBR MP3)
-    const files: ArchiveFile[] = data.result
+    const files = data.result
       .filter((file: ArchiveFile) => file.format === format)
       .map((file: ArchiveFile) => ({
         name: file.name,
@@ -61,13 +68,43 @@ Deno.serve(async (req) => {
         return trackA - trackB;
       });
 
-    console.log(`Found ${files.length} ${format} files`);
+    // Find bulk download options (torrent and ZIP)
+    const bulkDownloads: BulkDownload[] = [];
+    
+    // Find torrent file
+    const torrentFile = data.result.find((file: ArchiveFile) => 
+      file.format === 'Archive BitTorrent'
+    );
+    if (torrentFile) {
+      bulkDownloads.push({
+        type: 'torrent',
+        name: torrentFile.name,
+        size: torrentFile.size,
+        downloadUrl: `https://archive.org/download/${itemId}/${encodeURIComponent(torrentFile.name)}`,
+      });
+    }
+
+    // Find VBR MP3 ZIP file
+    const zipFile = data.result.find((file: ArchiveFile) => 
+      file.format === 'VBR ZIP'
+    );
+    if (zipFile) {
+      bulkDownloads.push({
+        type: 'zip',
+        name: zipFile.name,
+        size: zipFile.size,
+        downloadUrl: `https://archive.org/download/${itemId}/${encodeURIComponent(zipFile.name)}`,
+      });
+    }
+
+    console.log(`Found ${files.length} ${format} files and ${bulkDownloads.length} bulk download options`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         itemId,
         files,
+        bulkDownloads,
         totalFiles: files.length 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

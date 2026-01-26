@@ -3,8 +3,10 @@ import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { PlaylistEmbed } from "@/components/shared/PlaylistEmbed";
 import { ArchiveDownloadList } from "@/components/shared/ArchiveDownloadList";
+import { ArchiveContent } from "@/components/shared/ArchiveContent";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -145,26 +147,29 @@ export default function PostDetail() {
           )}
         </header>
 
-        {/* Playlist Embed */}
-        {post.playlist_embed_url && (
+        {/* Archive.org Full Content (Playlist + Downloads + Bulk) */}
+        {post.archive_item_id && (
+          <div className="mb-8">
+            <ArchiveContent itemId={post.archive_item_id} />
+          </div>
+        )}
+
+        {/* Standalone Playlist Embed (when no archive_item_id but has playlist_embed_url) */}
+        {!post.archive_item_id && post.playlist_embed_url && (
           <div className="mb-8">
             <PlaylistEmbed url={post.playlist_embed_url} />
           </div>
         )}
 
-        {/* Archive.org Download List */}
-        {post.archive_item_id && (
-          <div className="mb-8">
-            <ArchiveDownloadList itemId={post.archive_item_id} />
-          </div>
-        )}
-
         {/* Content */}
         {post.content && (
-          <div
-            className="prose prose-lg max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          <>
+            {post.archive_item_id && <Separator className="my-8" />}
+            <div
+              className="prose prose-lg max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+          </>
         )}
       </article>
     </Layout>
