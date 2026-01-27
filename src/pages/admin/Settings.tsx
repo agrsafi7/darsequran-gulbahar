@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Save, Settings as SettingsIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, Save, Settings as SettingsIcon, LayoutGrid } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 interface SiteSettings {
   site_name: string;
@@ -19,6 +21,7 @@ interface SiteSettings {
   contact_phone: string;
   contact_email: string;
   contact_hours: string;
+  recent_posts_categories: string;
 }
 
 export default function AdminSettings() {
@@ -31,10 +34,40 @@ export default function AdminSettings() {
     contact_phone: "",
     contact_email: "",
     contact_hours: "",
+    recent_posts_categories: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+
+  // Fetch all categories
+  const { data: categories } = useQuery({
+    queryKey: ["all-categories-for-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name")
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Fetch dars categories (scholars)
+  const { data: darsCategories } = useQuery({
+    queryKey: ["dars-categories-for-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dars_categories")
+        .select("id, title")
+        .eq("is_visible", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
   const fetchSettings = async () => {
     try {
@@ -58,6 +91,7 @@ export default function AdminSettings() {
         contact_phone: settingsMap.contact_phone || "",
         contact_email: settingsMap.contact_email || "",
         contact_hours: settingsMap.contact_hours || "",
+        recent_posts_categories: settingsMap.recent_posts_categories || "",
       });
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -101,6 +135,28 @@ export default function AdminSettings() {
       setSaving(false);
     }
   };
+
+  // Parse selected categories from comma-separated string
+  const selectedCategories = settings.recent_posts_categories
+    ? settings.recent_posts_categories.split(",").map(c => c.trim())
+    : [];
+
+  const toggleCategory = (categoryName: string) => {
+    const updated = selectedCategories.includes(categoryName)
+      ? selectedCategories.filter(c => c !== categoryName)
+      : [...selectedCategories, categoryName];
+    
+    setSettings(prev => ({
+      ...prev,
+      recent_posts_categories: updated.join(","),
+    }));
+  };
+
+  // Combine regular categories with dars categories for display
+  const allCategoryOptions = [
+    ...(categories || []).map(c => ({ name: c.name, type: "Category" })),
+    ...(darsCategories || []).map(c => ({ name: c.title, type: "Scholar" })),
+  ];
 
   if (loading) {
     return (
@@ -152,6 +208,55 @@ export default function AdminSettings() {
                 rows={3}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LayoutGrid className="h-5 w-5" />
+              Recent Posts Section
+            </CardTitle>
+            <CardDescription>
+              Select which categories should appear in the Recent Posts section on the homepage.
+              One post from each selected category will be displayed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {allCategoryOptions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No categories available. Create categories first.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {allCategoryOptions.map((category) => (
+                  <div
+                    key={category.name}
+                    className="flex items-center space-x-2 p-2 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                  >
+                    <Checkbox
+                      id={`cat-${category.name}`}
+                      checked={selectedCategories.includes(category.name)}
+                      onCheckedChange={() => toggleCategory(category.name)}
+                    />
+                    <Label
+                      htmlFor={`cat-${category.name}`}
+                      className="flex-1 cursor-pointer text-sm"
+                    >
+                      {category.name}
+                      <span className="text-xs text-muted-foreground ml-2">
+                        ({category.type})
+                      </span>
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-sm text-muted-foreground mt-4">
+              {selectedCategories.length === 0
+                ? "No categories selected. The Recent Posts section will be hidden."
+                : `${selectedCategories.length} category(ies) selected.`}
+            </p>
           </CardContent>
         </Card>
 
