@@ -1,5 +1,4 @@
 import { Layout } from "@/components/layout/Layout";
-import { CategoryPostsList } from "@/components/shared/CategoryPostsList";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -120,26 +119,6 @@ const DarsEQuran = () => {
         </div>
       </section>
 
-      {/* Posts Section - Shows all Dars-e-Quran related posts */}
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="font-heading text-3xl md:text-4xl text-foreground mb-4">
-              All Dars-e-Quran Content
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Browse all Quran lessons and educational content
-            </p>
-          </div>
-          <div className="max-w-4xl mx-auto">
-            <CategoryPostsList 
-              category="Dars-e-Quran" 
-              emptyTitle="No Content Available"
-              emptyMessage="Check back soon for Dars-e-Quran lessons."
-            />
-          </div>
-        </div>
-      </section>
     </Layout>
   );
 };
