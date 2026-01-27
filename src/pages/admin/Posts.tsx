@@ -54,9 +54,15 @@ interface Category {
   name: string;
 }
 
+interface DarsCategory {
+  id: string;
+  title: string;
+}
+
 export default function AdminPosts() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [darsCategories, setDarsCategories] = useState<DarsCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -77,7 +83,7 @@ export default function AdminPosts() {
 
   const fetchData = async () => {
     try {
-      const [postsRes, categoriesRes] = await Promise.all([
+      const [postsRes, categoriesRes, darsCategoriesRes] = await Promise.all([
         supabase
           .from("posts")
           .select("*")
@@ -86,11 +92,16 @@ export default function AdminPosts() {
           .from("categories")
           .select("id, name")
           .order("sort_order", { ascending: true }),
+        supabase
+          .from("dars_categories")
+          .select("id, title")
+          .order("sort_order", { ascending: true }),
       ]);
 
       if (postsRes.error) throw postsRes.error;
       setPosts(postsRes.data || []);
       setCategories(categoriesRes.data || []);
+      setDarsCategories(darsCategoriesRes.data || []);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({ title: "Error", description: "Failed to fetch posts", variant: "destructive" });
@@ -269,11 +280,29 @@ export default function AdminPosts() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.name}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
+                        {categories.length > 0 && (
+                          <>
+                            {categories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.name}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                        {darsCategories.length > 0 && (
+                          <>
+                            {categories.length > 0 && (
+                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
+                                Scholars (Dars-e-Quran)
+                              </div>
+                            )}
+                            {darsCategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.title}>
+                                {cat.title}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
