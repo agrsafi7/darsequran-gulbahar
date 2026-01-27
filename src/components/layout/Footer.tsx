@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Youtube, Instagram, Mail } from "lucide-react";
+import { Facebook, Youtube, Mail } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const navigationLinks = [
@@ -12,11 +12,9 @@ const navigationLinks = [
 ];
 
 const socialLinks = [
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Youtube, href: "#", label: "YouTube" },
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Mail, href: "mailto:info@example.com", label: "Email" },
+  { icon: Facebook, href: "https://www.facebook.com/darsequrangulbaharpeshawar", label: "Facebook" },
+  { icon: Youtube, href: "https://www.youtube.com/@darsequrangulbaharpeshawar", label: "YouTube" },
+  { icon: Mail, href: "mailto:darsequrangulbahar@gmail.com", label: "Email" },
 ];
 
 export function Footer() {
