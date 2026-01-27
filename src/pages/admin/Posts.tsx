@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -30,9 +37,10 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface Post {
   id: string;
@@ -78,6 +86,7 @@ export default function AdminPosts() {
     category: "",
     status: "draft",
     comments_enabled: true,
+    published_at: null as Date | null,
   });
   const { toast } = useToast();
 
@@ -134,6 +143,21 @@ export default function AdminPosts() {
     setSaving(true);
 
     try {
+      // Determine published_at date
+      let publishedAt: string | null = null;
+      if (formData.status === "published") {
+        if (formData.published_at) {
+          // Use selected date
+          publishedAt = formData.published_at.toISOString();
+        } else if (editingPost?.published_at) {
+          // Keep existing date when editing
+          publishedAt = editingPost.published_at;
+        } else {
+          // Default to now for new posts
+          publishedAt = new Date().toISOString();
+        }
+      }
+
       const postData = {
         title: formData.title,
         slug: formData.slug,
@@ -145,7 +169,7 @@ export default function AdminPosts() {
         category: formData.category || null,
         status: formData.status,
         comments_enabled: formData.comments_enabled,
-        published_at: formData.status === "published" ? new Date().toISOString() : null,
+        published_at: publishedAt,
       };
 
       if (editingPost) {
@@ -191,6 +215,7 @@ export default function AdminPosts() {
       category: post.category || "",
       status: post.status,
       comments_enabled: post.comments_enabled,
+      published_at: post.published_at ? new Date(post.published_at) : null,
     });
     setDialogOpen(true);
   };
@@ -222,6 +247,7 @@ export default function AdminPosts() {
       category: "",
       status: "draft",
       comments_enabled: true,
+      published_at: null,
     });
   };
 
@@ -320,9 +346,45 @@ export default function AdminPosts() {
                       <SelectContent>
                         <SelectItem value="draft">Draft</SelectItem>
                         <SelectItem value="published">Published</SelectItem>
+                        <SelectItem value="scheduled">Scheduled</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Publish Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.published_at && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.published_at ? (
+                          format(formData.published_at, "PPP")
+                        ) : (
+                          <span>Pick a date (optional)</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.published_at || undefined}
+                        onSelect={(date) =>
+                          setFormData((prev) => ({ ...prev, published_at: date || null }))
+                        }
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <p className="text-xs text-muted-foreground">
+                    Choose a past date to backdate or a future date to schedule.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="featured_image">Featured Image URL</Label>
@@ -452,8 +514,10 @@ export default function AdminPosts() {
                     <TableCell>
                       <Badge
                         variant={
-                          post.status === "published" ? "default" : "secondary"
+                          post.status === "published" ? "default" : 
+                          post.status === "scheduled" ? "outline" : "secondary"
                         }
+                        className={post.status === "scheduled" ? "border-primary text-primary" : ""}
                       >
                         {post.status}
                       </Badge>

@@ -38,7 +38,7 @@ export function CategoryPostsList({
         .from("posts")
         .select("id, title, slug, excerpt, featured_image, published_at, category")
         .eq("status", "published")
-        .order("published_at", { ascending: false });
+        .order("published_at", { ascending: false, nullsFirst: false });
 
       if (!error && data) {
         // Filter posts where category matches exactly or contains key parts of the category name
@@ -51,7 +51,15 @@ export function CategoryPostsList({
                  categoryLower.includes(postCategoryLower) ||
                  postCategoryLower.includes(categoryLower);
         });
-        setPosts(filteredPosts);
+        
+        // Sort by published_at descending (newest first)
+        const sortedPosts = filteredPosts.sort((a, b) => {
+          const dateA = a.published_at ? new Date(a.published_at).getTime() : 0;
+          const dateB = b.published_at ? new Date(b.published_at).getTime() : 0;
+          return dateB - dateA;
+        });
+        
+        setPosts(sortedPosts);
       }
       setLoading(false);
     };
