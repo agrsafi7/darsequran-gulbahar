@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { ContentSidebar } from "@/components/shared/ContentSidebar";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -74,35 +75,43 @@ export default function PageDetail() {
 
   return (
     <Layout>
-      <article className="container py-12 max-w-3xl mx-auto">
-        {/* Back button */}
-        <Button variant="ghost" asChild className="mb-6">
-          <Link to="/">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Link>
-        </Button>
+      <div className="container py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Content */}
+          <article className="flex-1 max-w-3xl">
+            {/* Back button */}
+            <Button variant="ghost" asChild className="mb-6">
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Link>
+            </Button>
 
-        {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-4xl font-heading font-bold text-foreground">
-            {page.title}
-          </h1>
-          {page.meta_description && (
-            <p className="mt-4 text-lg text-muted-foreground">
-              {page.meta_description}
-            </p>
-          )}
-        </header>
+            {/* Header */}
+            <header className="mb-8">
+              <h1 className="text-4xl font-heading font-bold text-foreground">
+                {page.title}
+              </h1>
+              {page.meta_description && (
+                <p className="mt-4 text-lg text-muted-foreground">
+                  {page.meta_description}
+                </p>
+              )}
+            </header>
 
-        {/* Content */}
-        {page.content && (
-          <div
-            className="prose prose-lg max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: page.content }}
-          />
-        )}
-      </article>
+            {/* Content */}
+            {page.content && (
+              <div
+                className="prose prose-lg max-w-none dark:prose-invert"
+                dangerouslySetInnerHTML={{ __html: page.content }}
+              />
+            )}
+          </article>
+
+          {/* Sidebar */}
+          <ContentSidebar />
+        </div>
+      </div>
     </Layout>
   );
 }
