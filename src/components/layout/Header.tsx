@@ -39,17 +39,17 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between lg:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
             <img 
               src={logo} 
               alt="DarseQuran Gulbahar Peshawar" 
-              className="w-12 h-12 lg:w-14 lg:h-14 object-contain"
+              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain"
             />
-            <div className="hidden sm:block">
-              <h1 className="font-heading text-lg lg:text-xl text-primary leading-tight">
+            <div>
+              <h1 className="font-heading text-sm sm:text-lg lg:text-xl text-primary leading-tight">
                 DarseQuran Gulbahar Peshawar
               </h1>
-              <p className="text-xs text-muted-foreground">مرکز اشاعت القرآن گلبہار</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">مرکز اشاعت القرآن گلبہار</p>
             </div>
           </Link>
 
