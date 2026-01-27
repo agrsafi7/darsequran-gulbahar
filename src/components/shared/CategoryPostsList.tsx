@@ -11,6 +11,7 @@ interface Post {
   excerpt: string | null;
   featured_image: string | null;
   published_at: string | null;
+  category: string | null;
 }
 
 interface CategoryPostsListProps {
@@ -31,15 +32,25 @@ export function CategoryPostsList({
 
   useEffect(() => {
     const fetchPosts = async () => {
+      // Fetch posts that match the category exactly or contain the category name (for flexible matching)
       const { data, error } = await supabase
         .from("posts")
-        .select("id, title, slug, excerpt, featured_image, published_at")
-        .eq("category", category)
+        .select("id, title, slug, excerpt, featured_image, published_at, category")
         .eq("status", "published")
         .order("published_at", { ascending: false });
 
       if (!error && data) {
-        setPosts(data);
+        // Filter posts where category matches exactly or contains key parts of the category name
+        const categoryLower = category.toLowerCase();
+        const filteredPosts = data.filter(post => {
+          if (!post.category) return false;
+          const postCategoryLower = post.category.toLowerCase();
+          // Exact match or contains match
+          return postCategoryLower === categoryLower || 
+                 categoryLower.includes(postCategoryLower) ||
+                 postCategoryLower.includes(categoryLower);
+        });
+        setPosts(filteredPosts);
       }
       setLoading(false);
     };
