@@ -1,9 +1,46 @@
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdPlaceholder } from "@/components/shared/AdPlaceholder";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AboutPreview() {
+  // Fetch the About page content from the database
+  const { data: aboutPage, isLoading } = useQuery({
+    queryKey: ["about-page-preview"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pages")
+        .select("title, content, meta_description")
+        .eq("slug", "about")
+        .eq("status", "published")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Extract a preview from the content (first ~300 characters of text, stripped of HTML)
+  const getContentPreview = (htmlContent: string | null) => {
+    if (!htmlContent) return null;
+    
+    // Strip HTML tags to get plain text
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlContent;
+    const textContent = tempDiv.textContent || tempDiv.innerText || "";
+    
+    // Get first ~400 characters and trim at last complete word
+    if (textContent.length <= 400) return textContent;
+    
+    const trimmed = textContent.substring(0, 400);
+    const lastSpace = trimmed.lastIndexOf(" ");
+    return trimmed.substring(0, lastSpace) + "...";
+  };
+
+  const contentPreview = getContentPreview(aboutPage?.content || null);
+
   return (
     <section className="py-16 lg:py-24 bg-secondary/30">
       <div className="container mx-auto px-4">
@@ -19,49 +56,22 @@ export function AboutPreview() {
               Spreading the Light of <span className="text-primary">Islamic Knowledge</span>
             </h2>
             
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Welcome to our Islamic Educational Platform, a dedicated space for seekers of 
-              authentic Islamic knowledge. Our mission is to make the teachings of the Quran 
-              and the wisdom of Islamic scholarship accessible to everyone, regardless of their 
-              background or location.
-            </p>
-            
-            <p className="text-muted-foreground leading-relaxed">
-              Through our comprehensive Dars-e-Quran sessions, insightful speeches, and carefully 
-              curated books, we aim to nurture spiritual growth and foster a deeper understanding 
-              of Islam. Our platform serves as a bridge connecting hearts to the timeless guidance 
-              of the Quran.
-            </p>
-
-            <div className="flex flex-wrap gap-6 pt-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg hero-gradient flex items-center justify-center">
-                  <span className="text-primary-foreground font-heading text-xl">📖</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">100+</p>
-                  <p className="text-sm text-muted-foreground">Quran Lessons</p>
-                </div>
+            {isLoading ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading...
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg hero-gradient flex items-center justify-center">
-                  <span className="text-primary-foreground font-heading text-xl">🎙️</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">50+</p>
-                  <p className="text-sm text-muted-foreground">Speeches</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg hero-gradient flex items-center justify-center">
-                  <span className="text-primary-foreground font-heading text-xl">📚</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">25+</p>
-                  <p className="text-sm text-muted-foreground">Books</p>
-                </div>
-              </div>
-            </div>
+            ) : contentPreview ? (
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                {contentPreview}
+              </p>
+            ) : (
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Welcome to our Islamic Educational Platform, a dedicated space for seekers of 
+                authentic Islamic knowledge. Our mission is to make the teachings of the Quran 
+                and the wisdom of Islamic scholarship accessible to everyone.
+              </p>
+            )}
 
             <div className="pt-4">
               <Button asChild className="group">
