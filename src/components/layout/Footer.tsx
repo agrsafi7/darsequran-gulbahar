@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Youtube, Mail } from "lucide-react";
+import { Facebook, Youtube, Mail, MessageCircle } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const navigationLinks = [
@@ -14,6 +14,7 @@ const navigationLinks = [
 const socialLinks = [
   { icon: Facebook, href: "https://www.facebook.com/darsequrangulbaharpeshawar", label: "Facebook" },
   { icon: Youtube, href: "https://www.youtube.com/@darsequrangulbaharpeshawar", label: "YouTube" },
+  { icon: MessageCircle, href: "https://whatsapp.com/channel/0029Va8kjzj1dAvzifTP8X2o", label: "WhatsApp Channel" },
   { icon: Mail, href: "mailto:darsequrangulbahar@gmail.com", label: "Email" },
 ];
 
