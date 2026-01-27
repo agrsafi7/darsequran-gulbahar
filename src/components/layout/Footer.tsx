@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Youtube, Instagram, Mail } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const navigationLinks = [
   { title: "Home", href: "/" },
@@ -29,18 +30,19 @@ export function Footer() {
           {/* Left Column - Logo & Description */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 rounded-full bg-primary-foreground/10 flex items-center justify-center border border-accent/30 group-hover:border-accent transition-colors">
-                <span className="text-accent font-heading text-xl">ﷲ</span>
-              </div>
+              <img 
+                src={logo} 
+                alt="DarseQuran Gulbahar Peshawar" 
+                className="w-14 h-14 object-contain bg-white rounded-full p-1"
+              />
               <div>
-                <h2 className="font-heading text-xl text-primary-foreground">Islamic Education</h2>
-                <p className="text-xs text-primary-foreground/60">Learn • Grow • Inspire</p>
+                <h2 className="font-heading text-lg text-primary-foreground">DarseQuran Gulbahar Peshawar</h2>
+                <p className="text-xs text-primary-foreground/60">مرکز اشاعت القرآن گلبہار</p>
               </div>
             </Link>
             <p className="text-sm text-primary-foreground/80 leading-relaxed max-w-sm">
-              Dedicated to spreading authentic Islamic knowledge through Quran teachings, 
-              scholarly speeches, and educational resources. Join us on the path of learning 
-              and spiritual growth.
+              Spreading the true meaning of Quran in simple method and interpreting Islam 
+              according to the teachings of Quran and Sunnah in Pashto and Urdu languages.
             </p>
           </div>
 
@@ -91,7 +93,7 @@ export function Footer() {
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-primary-foreground/60">
-            <p>© {currentYear} Islamic Education Platform — All Rights Reserved</p>
+            <p>© {currentYear} DarseQuran Gulbahar Peshawar — All Rights Reserved</p>
             <div className="flex gap-4">
               <Link to="/privacy" className="hover:text-accent transition-colors">
                 Privacy Policy
