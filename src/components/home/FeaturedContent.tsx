@@ -31,14 +31,33 @@ const features = [
   },
 ];
 
-// Categories to show one post each from
-const targetCategories = ["Speeches", "Books"];
-
 export function FeaturedContent() {
+  // Fetch the recent_posts_categories setting
+  const { data: categoriesSetting } = useQuery({
+    queryKey: ["recent-posts-categories-setting"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "recent_posts_categories")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data?.value || "";
+    },
+  });
+
+  // Parse categories from setting
+  const targetCategories = categoriesSetting
+    ? categoriesSetting.split(",").map(c => c.trim()).filter(Boolean)
+    : [];
+
   // Fetch one post from each target category
   const { data: recentPosts, isLoading } = useQuery({
-    queryKey: ["recent-posts-by-category"],
+    queryKey: ["recent-posts-by-category", targetCategories],
     queryFn: async () => {
+      if (targetCategories.length === 0) return [];
+
       const posts: Array<{
         id: string;
         title: string;
@@ -65,25 +84,13 @@ export function FeaturedContent() {
         }
       }
 
-      // Also try to get one Dars-e-Quran post (or from any dars_categories scholar)
-      const { data: darsPost } = await supabase
-        .from("posts")
-        .select("id, title, slug, category, excerpt, featured_image, published_at")
-        .eq("status", "published")
-        .or("category.eq.Dars-e-Quran,category.eq.Listen Online,category.eq.Download,category.eq.Complete Dars")
-        .order("published_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (darsPost) {
-        posts.unshift(darsPost); // Add at the beginning
-      }
-
       return posts;
     },
+    enabled: targetCategories.length > 0,
   });
 
   const hasRecentPosts = recentPosts && recentPosts.length > 0;
+  const showRecentPosts = targetCategories.length > 0 && (isLoading || hasRecentPosts);
 
   return (
     <section className="py-16 lg:py-24">
@@ -128,8 +135,8 @@ export function FeaturedContent() {
           ))}
         </div>
 
-        {/* Recent Posts - Only show if posts are available */}
-        {(isLoading || hasRecentPosts) && (
+        {/* Recent Posts - Only show if categories are configured and posts are available */}
+        {showRecentPosts && (
           <div className="space-y-8">
             <div className="flex items-center justify-between">
               <h3 className="font-heading text-2xl md:text-3xl text-foreground">Recent Posts</h3>
