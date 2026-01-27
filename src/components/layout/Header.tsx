@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, Loader2 } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -39,14 +40,16 @@ export function Header() {
         <div className="flex h-16 items-center justify-between lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full hero-gradient flex items-center justify-center shadow-md group-hover:shadow-gold transition-shadow duration-300">
-              <span className="text-primary-foreground font-heading text-lg lg:text-xl">ﷲ</span>
-            </div>
+            <img 
+              src={logo} 
+              alt="DarseQuran Gulbahar Peshawar" 
+              className="w-12 h-12 lg:w-14 lg:h-14 object-contain"
+            />
             <div className="hidden sm:block">
-              <h1 className="font-heading text-xl lg:text-2xl text-primary leading-tight">
-                Islamic Education
+              <h1 className="font-heading text-lg lg:text-xl text-primary leading-tight">
+                DarseQuran Gulbahar Peshawar
               </h1>
-              <p className="text-xs text-muted-foreground">Learn • Grow • Inspire</p>
+              <p className="text-xs text-muted-foreground">مرکز اشاعت القرآن گلبہار</p>
             </div>
           </Link>
 
