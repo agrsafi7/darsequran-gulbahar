@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText } from "lucide-react";
@@ -29,6 +29,7 @@ export function CategoryPostsList({
 }: CategoryPostsListProps) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -88,6 +89,7 @@ export function CategoryPostsList({
         <Link
           key={post.id}
           to={`/post/${post.slug}`}
+          state={{ from: location.pathname }}
           className="block p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors group"
         >
           <div className="flex items-start gap-4">
