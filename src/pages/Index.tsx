@@ -14,7 +14,7 @@ const Index = () => {
       {/* Below Hero Ad */}
       <section className="py-6 bg-cream">
         <div className="container mx-auto px-4">
-          <AdPlaceholder size="horizontal" label="Below Hero Banner" />
+          <AdPlaceholder size="horizontal" location="header" label="Below Hero Banner" />
         </div>
       </section>
 

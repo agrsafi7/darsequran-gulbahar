@@ -81,7 +81,7 @@ const About = () => {
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-8">
-                <AdPlaceholder size="vertical" label="Sidebar Ad" />
+                <AdPlaceholder size="vertical" location="sidebar" label="Sidebar Ad" />
               </div>
             </div>
           </div>

@@ -68,7 +68,7 @@ export function ContentSidebar({ currentPostId, currentCategory }: ContentSideba
   return (
     <aside className="w-full lg:w-80 space-y-6">
       {/* Ad Placeholder */}
-      <AdPlaceholder size="square" label="Sidebar Ad" className="mx-auto" />
+      <AdPlaceholder size="square" location="sidebar" label="Sidebar Ad" className="mx-auto" />
 
       {/* Related Posts */}
       <Card className="border-0 shadow-md">

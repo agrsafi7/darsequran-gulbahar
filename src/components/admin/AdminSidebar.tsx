@@ -9,6 +9,7 @@ import {
   LogOut,
   Layers,
   Tags,
+  Megaphone,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -35,6 +36,7 @@ const menuItems = [
   { title: "Hero Slides", url: "/admin/hero-slides", icon: Layers },
   { title: "Navigation", url: "/admin/navigation", icon: Menu },
   { title: "Comments", url: "/admin/comments", icon: MessageSquare },
+  { title: "Ad Placements", url: "/admin/ads", icon: Megaphone },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
