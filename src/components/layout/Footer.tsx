@@ -93,17 +93,9 @@ export function Footer() {
       {/* Copyright Bar */}
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-primary-foreground/60">
-            <p>© {currentYear} DarseQuran Gulbahar Peshawar — All Rights Reserved</p>
-            <div className="flex gap-4">
-              <Link to="/privacy" className="hover:text-accent transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="hover:text-accent transition-colors">
-                Terms of Use
-              </Link>
-            </div>
-          </div>
+          <p className="text-sm text-primary-foreground/60 text-center">
+            © {currentYear} DarseQuran Gulbahar Peshawar — All Rights Reserved
+          </p>
         </div>
       </div>
     </footer>
