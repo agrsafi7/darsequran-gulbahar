@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
-import { CategoryPostsList } from "@/components/shared/CategoryPostsList";
+import { HierarchicalCategoryPosts } from "@/components/shared/HierarchicalCategoryPosts";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -94,8 +94,8 @@ const ScholarPage = () => {
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <CategoryPostsList
-              category={category.title}
+            <HierarchicalCategoryPosts
+              parentCategoryName={category.title}
               emptyIcon={<User className="w-8 h-8 text-primary-foreground" />}
               emptyTitle="No Lessons Available"
               emptyMessage={`Check back soon for lessons from ${category.title}.`}
