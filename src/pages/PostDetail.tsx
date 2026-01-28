@@ -48,17 +48,40 @@ export default function PostDetail() {
     }
   }, [slug]);
 
-  // Check if user came from a scholar page
+  // Check if user came from a category/subcategory page
   useEffect(() => {
     const referrer = location.state?.from;
     if (referrer && referrer.startsWith("/dars-e-quran/")) {
-      const scholarSlug = referrer.split("/dars-e-quran/")[1];
+      const pathParts = referrer.replace("/dars-e-quran/", "").split("/");
+      const scholarSlug = pathParts[0];
+      const categorySlug = pathParts[1];
+      
       if (scholarSlug && !["listen", "download", "complete"].includes(scholarSlug)) {
-        // User came from a scholar page
-        fetchScholarName(scholarSlug);
+        if (categorySlug) {
+          // User came from a subcategory page
+          fetchSubcategoryInfo(scholarSlug, categorySlug);
+        } else {
+          // User came from a scholar page
+          fetchScholarName(scholarSlug);
+        }
       }
     }
   }, [location.state]);
+
+  const fetchSubcategoryInfo = async (scholarSlug: string, categorySlug: string) => {
+    const { data: categoryData } = await supabase
+      .from("categories")
+      .select("name")
+      .eq("slug", categorySlug)
+      .maybeSingle();
+
+    if (categoryData) {
+      setScholarBackRoute({
+        url: `/dars-e-quran/${scholarSlug}/${categorySlug}`,
+        label: categoryData.name,
+      });
+    }
+  };
 
   const fetchScholarName = async (scholarSlug: string) => {
     const { data } = await supabase
