@@ -12,10 +12,10 @@ const navigationLinks = [
 ];
 
 const socialLinks = [
-  { icon: Facebook, href: "https://www.facebook.com/darsequrangulbaharpeshawar", label: "Facebook" },
-  { icon: Youtube, href: "https://www.youtube.com/@darsequrangulbaharpeshawar", label: "YouTube" },
-  { icon: MessageCircle, href: "https://whatsapp.com/channel/0029Va8kjzj1dAvzifTP8X2o", label: "WhatsApp Channel" },
-  { icon: Mail, href: "mailto:darsequrangulbahar@gmail.com", label: "Email" },
+  { icon: Facebook, href: "https://www.facebook.com/darsequrangulbaharpeshawar", label: "Facebook", color: "bg-[#1877F2] hover:bg-[#166FE5]" },
+  { icon: Youtube, href: "https://www.youtube.com/@darsequrangulbaharpeshawar", label: "YouTube", color: "bg-[#FF0000] hover:bg-[#E60000]" },
+  { icon: MessageCircle, href: "https://whatsapp.com/channel/0029Va8kjzj1dAvzifTP8X2o", label: "WhatsApp Channel", color: "bg-[#25D366] hover:bg-[#20BD5A]" },
+  { icon: Mail, href: "mailto:darsequrangulbahar@gmail.com", label: "Email", color: "bg-[#EA4335] hover:bg-[#D33426]" },
 ];
 
 export function Footer() {
@@ -67,15 +67,17 @@ export function Footer() {
           {/* Right Column - Social Links */}
           <div>
             <h3 className="font-heading text-lg mb-4 text-accent">Connect With Us</h3>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center border border-primary-foreground/20 hover:border-accent hover:bg-accent/20 transition-all duration-300 group"
+                  className={`w-12 h-12 rounded-full ${social.color} flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl`}
                 >
-                  <social.icon className="w-4 h-4 text-primary-foreground/80 group-hover:text-accent transition-colors" />
+                  <social.icon className="w-5 h-5 text-white" />
                 </a>
               ))}
             </div>

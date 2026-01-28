@@ -22,8 +22,11 @@
     --popover-foreground: 160 30% 15%;
 
     /* Primary - Deep Emerald Green (Islamic) */
-    --primary: 158 78% 23%;
+    --primary: 160 85% 18%;
     --primary-foreground: 40 30% 98%;
+    
+    /* Footer - Dark Slate */
+    --footer-bg: 210 18% 35%;
 
     /* Secondary - Warm Cream */
     --secondary: 40 25% 93%;
@@ -47,7 +50,7 @@
     --radius: 0.625rem;
 
     /* Extended Palette */
-    --emerald-dark: 160 75% 18%;
+    --emerald-dark: 160 85% 14%;
     --emerald-light: 155 45% 88%;
     --gold-dark: 42 70% 45%;
     --gold-light: 42 65% 92%;
@@ -205,7 +208,7 @@
 
   /* Footer Styles */
   .footer-gradient {
-    background: linear-gradient(180deg, hsl(160 75% 18%) 0%, hsl(160 80% 12%) 100%);
+    background: linear-gradient(180deg, hsl(210 18% 38%) 0%, hsl(210 20% 30%) 100%);
   }
 
   /* Smooth Animations */
