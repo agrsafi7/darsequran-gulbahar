@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { CategoryPostsList } from "@/components/shared/CategoryPostsList";
 import { useParams, Link } from "react-router-dom";
@@ -5,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Folder } from "lucide-react";
+import { trackContentView } from "@/lib/analytics";
 
 const SubcategoryPage = () => {
   const { scholarSlug, categorySlug } = useParams<{ scholarSlug: string; categorySlug: string }>();
@@ -40,6 +42,13 @@ const SubcategoryPage = () => {
     },
     enabled: !!categorySlug,
   });
+
+  // Track page view when category loads
+  useEffect(() => {
+    if (category && categorySlug) {
+      trackContentView('subcategory', categorySlug, category.name);
+    }
+  }, [category, categorySlug]);
 
   const isLoading = scholarLoading || categoryLoading;
 

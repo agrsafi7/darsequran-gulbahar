@@ -9,6 +9,7 @@ import { ArchiveContent } from "@/components/shared/ArchiveContent";
 import { ContentSidebar } from "@/components/shared/ContentSidebar";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { trackContentView } from "@/lib/analytics";
 
 interface Post {
   id: string;
@@ -63,6 +64,9 @@ export default function PostDetail() {
     }
     
     setPost(data);
+    
+    // Track page view
+    trackContentView('post', data.slug, data.title);
     
     // Determine back route based on post category
     if (data.category) {
