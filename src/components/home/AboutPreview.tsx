@@ -86,7 +86,7 @@ export function AboutPreview() {
           {/* Ad Placeholder - 1 column */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
-              <AdPlaceholder size="vertical" label="Sidebar Ad" />
+              <AdPlaceholder size="vertical" location="sidebar" label="Sidebar Ad" />
             </div>
           </div>
         </div>
