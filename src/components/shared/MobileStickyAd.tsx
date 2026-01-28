@@ -2,16 +2,27 @@ import { useState, useEffect, forwardRef } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import {
+  ensureAdSenseScript,
+  extractAdSenseClientIdFromCode,
+  parseAdSenseUnitFromCode,
+  renderAdSenseUnit,
+} from "@/lib/adsense";
 
 export const MobileStickyAd = forwardRef<HTMLDivElement>((_, ref) => {
   const [adCode, setAdCode] = useState<string | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [renderKey, setRenderKey] = useState(0);
 
   useEffect(() => {
     fetchAdSettings();
   }, []);
+
+  useEffect(() => {
+    setRenderKey((k) => k + 1);
+  }, [adCode, isEnabled, isDismissed]);
 
   const fetchAdSettings = async () => {
     const { data, error } = await supabase
@@ -35,6 +46,9 @@ export const MobileStickyAd = forwardRef<HTMLDivElement>((_, ref) => {
     return null;
   }
 
+  const unit = parseAdSenseUnitFromCode(adCode);
+  const clientId = extractAdSenseClientIdFromCode(adCode);
+
   return (
     <div 
       className={cn(
@@ -42,6 +56,7 @@ export const MobileStickyAd = forwardRef<HTMLDivElement>((_, ref) => {
         "lg:hidden", // Only show on mobile/tablet, hide on desktop
         "safe-area-inset-bottom" // Account for iOS safe area
       )}
+      ref={ref}
     >
       <div className="relative">
         {/* Dismiss button */}
@@ -54,10 +69,22 @@ export const MobileStickyAd = forwardRef<HTMLDivElement>((_, ref) => {
         </button>
         
         {/* Ad content */}
-        <div 
-          className="p-2 flex items-center justify-center min-h-[60px]"
-          dangerouslySetInnerHTML={{ __html: adCode }}
-        />
+        {unit && clientId ? (
+          <div
+            key={renderKey}
+            className="p-2 flex items-center justify-center min-h-[60px]"
+            ref={(el) => {
+              if (!el) return;
+              ensureAdSenseScript(clientId);
+              renderAdSenseUnit(el, unit);
+            }}
+          />
+        ) : (
+          <div
+            className="p-2 flex items-center justify-center min-h-[60px]"
+            dangerouslySetInnerHTML={{ __html: adCode }}
+          />
+        )}
       </div>
     </div>
   );

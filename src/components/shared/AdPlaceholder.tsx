@@ -1,6 +1,12 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  ensureAdSenseScript,
+  extractAdSenseClientIdFromCode,
+  parseAdSenseUnitFromCode,
+  renderAdSenseUnit,
+} from "@/lib/adsense";
 
 type AdSize = "horizontal" | "vertical" | "square" | "leaderboard";
 type AdLocation = "header" | "sidebar" | "in_content" | "footer" | "mobile";
@@ -31,10 +37,16 @@ export function AdPlaceholder({ size, location, className, label = "Advertisemen
   const [adCode, setAdCode] = useState<string | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [renderKey, setRenderKey] = useState(0);
 
   useEffect(() => {
     fetchAdSettings();
   }, [location]);
+
+  // When adCode changes, bump key to ensure the container effect re-runs cleanly.
+  useEffect(() => {
+    setRenderKey((k) => k + 1);
+  }, [adCode, isEnabled]);
 
   const fetchAdSettings = async () => {
     const keys = locationToSettingKey[location];
@@ -57,6 +69,28 @@ export function AdPlaceholder({ size, location, className, label = "Advertisemen
 
   // If ad is enabled and has code, render the actual ad
   if (!loading && isEnabled && adCode) {
+    const unit = parseAdSenseUnitFromCode(adCode);
+    const clientId = extractAdSenseClientIdFromCode(adCode);
+
+    // If we can parse an AdSense <ins> unit, render it the right way (scripts injected
+    // via innerHTML do NOT execute in browsers).
+    if (unit && clientId) {
+      return (
+        <div
+          key={renderKey}
+          className={cn("ad-container", className)}
+          role="complementary"
+          aria-label={label}
+          ref={(el) => {
+            if (!el) return;
+            ensureAdSenseScript(clientId);
+            renderAdSenseUnit(el, unit);
+          }}
+        />
+      );
+    }
+
+    // Fallback: render raw HTML (works for non-AdSense HTML banners)
     return (
       <div
         className={cn("ad-container", className)}
