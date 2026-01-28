@@ -1,5 +1,22 @@
-import { useState } from "react";
-import { ChevronRight, ChevronDown, Pencil, Trash2, FolderOpen, Folder } from "lucide-react";
+import { useState, useMemo } from "react";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { ChevronRight, ChevronDown, Pencil, Trash2, FolderOpen, Folder, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -20,31 +37,66 @@ interface CategoryTreeProps {
   categories: Category[];
   onEdit: (category: Category) => void;
   onDelete: (id: string) => void;
+  onReorder?: (categoryId: string, newParentId: string | null, newSortOrder: number) => void;
 }
 
-interface CategoryNodeProps {
+interface SortableCategoryNodeProps {
   node: CategoryWithChildren;
   depth: number;
   onEdit: (category: Category) => void;
   onDelete: (id: string) => void;
   hasChildren: boolean;
+  expandedIds: Set<string>;
+  toggleExpand: (id: string) => void;
 }
 
-function CategoryNode({ node, depth, onEdit, onDelete, hasChildren }: CategoryNodeProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+function SortableCategoryNode({ 
+  node, 
+  depth, 
+  onEdit, 
+  onDelete, 
+  hasChildren,
+  expandedIds,
+  toggleExpand 
+}: SortableCategoryNodeProps) {
+  const isExpanded = expandedIds.has(node.id);
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: node.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   return (
-    <div className="animate-fade-in">
+    <div ref={setNodeRef} style={style}>
       <div
         className={cn(
           "flex items-center gap-2 py-2 px-3 rounded-lg transition-colors hover:bg-muted/50 group",
-          depth > 0 && "ml-6 border-l-2 border-border"
+          isDragging && "opacity-50 bg-muted",
+          depth > 0 && "border-l-2 border-border"
         )}
         style={{ marginLeft: depth > 0 ? `${depth * 24}px` : 0 }}
       >
+        {/* Drag handle */}
+        <button
+          className="p-1 rounded hover:bg-muted cursor-grab active:cursor-grabbing touch-none"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </button>
+
         {/* Expand/Collapse toggle */}
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => toggleExpand(node.id)}
           className={cn(
             "p-1 rounded hover:bg-muted transition-colors",
             !hasChildren && "invisible"
@@ -105,13 +157,15 @@ function CategoryNode({ node, depth, onEdit, onDelete, hasChildren }: CategoryNo
       {hasChildren && isExpanded && (
         <div className="animate-accordion-down">
           {node.children.map((child) => (
-            <CategoryNode
+            <SortableCategoryNode
               key={child.id}
               node={child}
               depth={depth + 1}
               onEdit={onEdit}
               onDelete={onDelete}
               hasChildren={child.children.length > 0}
+              expandedIds={expandedIds}
+              toggleExpand={toggleExpand}
             />
           ))}
         </div>
@@ -120,7 +174,40 @@ function CategoryNode({ node, depth, onEdit, onDelete, hasChildren }: CategoryNo
   );
 }
 
-export function CategoryTree({ categories, onEdit, onDelete }: CategoryTreeProps) {
+function DragOverlayContent({ node }: { node: CategoryWithChildren }) {
+  return (
+    <div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-card border border-primary shadow-lg">
+      <GripVertical className="h-4 w-4 text-muted-foreground" />
+      <Folder className="h-4 w-4 text-primary" />
+      <span className="font-medium text-foreground">{node.name}</span>
+    </div>
+  );
+}
+
+export function CategoryTree({ categories, onEdit, onDelete, onReorder }: CategoryTreeProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(categories.map(c => c.id)));
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   // Build hierarchical structure
   const buildHierarchy = (items: Category[]): CategoryWithChildren[] => {
     const map = new Map<string, CategoryWithChildren>();
@@ -151,7 +238,78 @@ export function CategoryTree({ categories, onEdit, onDelete }: CategoryTreeProps
     return roots;
   };
 
-  const hierarchicalCategories = buildHierarchy(categories);
+  const hierarchicalCategories = useMemo(() => buildHierarchy(categories), [categories]);
+  
+  // Flatten for sortable context
+  const flattenForSortable = (nodes: CategoryWithChildren[]): string[] => {
+    const result: string[] = [];
+    const traverse = (items: CategoryWithChildren[]) => {
+      items.forEach(node => {
+        result.push(node.id);
+        if (expandedIds.has(node.id) && node.children.length > 0) {
+          traverse(node.children);
+        }
+      });
+    };
+    traverse(nodes);
+    return result;
+  };
+
+  const sortableIds = useMemo(
+    () => flattenForSortable(hierarchicalCategories),
+    [hierarchicalCategories, expandedIds]
+  );
+
+  const findNode = (id: string): CategoryWithChildren | null => {
+    const search = (nodes: CategoryWithChildren[]): CategoryWithChildren | null => {
+      for (const node of nodes) {
+        if (node.id === id) return node;
+        const found = search(node.children);
+        if (found) return found;
+      }
+      return null;
+    };
+    return search(hierarchicalCategories);
+  };
+
+  const activeNode = activeId ? findNode(activeId) : null;
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over || active.id === over.id || !onReorder) return;
+
+    const activeCategory = categories.find(c => c.id === active.id);
+    const overCategory = categories.find(c => c.id === over.id);
+
+    if (!activeCategory || !overCategory) return;
+
+    // Determine new parent and sort order
+    const newParentId = overCategory.parent_id;
+    
+    // Get siblings at the same level
+    const siblings = categories.filter(c => c.parent_id === newParentId);
+    const overIndex = siblings.findIndex(c => c.id === over.id);
+    
+    // Calculate new sort order
+    let newSortOrder: number;
+    if (overIndex === 0) {
+      newSortOrder = siblings[0].sort_order - 1;
+    } else if (overIndex === siblings.length - 1) {
+      newSortOrder = siblings[siblings.length - 1].sort_order + 1;
+    } else {
+      const before = siblings[overIndex - 1];
+      const after = siblings[overIndex];
+      newSortOrder = Math.floor((before.sort_order + after.sort_order) / 2);
+    }
+
+    onReorder(active.id as string, newParentId, newSortOrder);
+  };
 
   if (categories.length === 0) {
     return (
@@ -162,17 +320,32 @@ export function CategoryTree({ categories, onEdit, onDelete }: CategoryTreeProps
   }
 
   return (
-    <div className="space-y-1">
-      {hierarchicalCategories.map((node) => (
-        <CategoryNode
-          key={node.id}
-          node={node}
-          depth={0}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          hasChildren={node.children.length > 0}
-        />
-      ))}
-    </div>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+        <div className="space-y-1">
+          {hierarchicalCategories.map((node) => (
+            <SortableCategoryNode
+              key={node.id}
+              node={node}
+              depth={0}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              hasChildren={node.children.length > 0}
+              expandedIds={expandedIds}
+              toggleExpand={toggleExpand}
+            />
+          ))}
+        </div>
+      </SortableContext>
+      
+      <DragOverlay>
+        {activeNode ? <DragOverlayContent node={activeNode} /> : null}
+      </DragOverlay>
+    </DndContext>
   );
 }
