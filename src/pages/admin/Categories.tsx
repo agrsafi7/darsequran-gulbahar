@@ -213,6 +213,27 @@ export default function AdminCategories() {
     }
   };
 
+  const handleReorder = async (categoryId: string, newParentId: string | null, newSortOrder: number) => {
+    const { error } = await supabase
+      .from("categories")
+      .update({ 
+        parent_id: newParentId, 
+        sort_order: newSortOrder 
+      })
+      .eq("id", categoryId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reorder category",
+        variant: "destructive",
+      });
+    } else {
+      toast({ title: "Success", description: "Category reordered" });
+      fetchCategories();
+    }
+  };
+
   // Build hierarchical structure for display
   const buildHierarchy = (categories: Category[]): CategoryWithChildren[] => {
     const map = new Map<string, CategoryWithChildren>();
@@ -420,6 +441,7 @@ export default function AdminCategories() {
               categories={categories}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onReorder={handleReorder}
             />
           ) : (
             <Table>
