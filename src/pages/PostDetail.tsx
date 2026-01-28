@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,67 +36,16 @@ const categoryRoutes: Record<string, { url: string; label: string }> = {
 
 export default function PostDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const location = useLocation();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [scholarBackRoute, setScholarBackRoute] = useState<{ url: string; label: string } | null>(null);
+  const [backRoute, setBackRoute] = useState<{ url: string; label: string }>({ url: "/posts", label: "Posts" });
 
   useEffect(() => {
     if (slug) {
       fetchPost();
     }
   }, [slug]);
-
-  // Check if user came from a category/subcategory page
-  useEffect(() => {
-    const referrer = location.state?.from;
-    if (referrer && referrer.startsWith("/dars-e-quran/")) {
-      const pathParts = referrer.replace("/dars-e-quran/", "").split("/");
-      const scholarSlug = pathParts[0];
-      const categorySlug = pathParts[1];
-      
-      if (scholarSlug && !["listen", "download", "complete"].includes(scholarSlug)) {
-        if (categorySlug) {
-          // User came from a subcategory page
-          fetchSubcategoryInfo(scholarSlug, categorySlug);
-        } else {
-          // User came from a scholar page
-          fetchScholarName(scholarSlug);
-        }
-      }
-    }
-  }, [location.state]);
-
-  const fetchSubcategoryInfo = async (scholarSlug: string, categorySlug: string) => {
-    const { data: categoryData } = await supabase
-      .from("categories")
-      .select("name")
-      .eq("slug", categorySlug)
-      .maybeSingle();
-
-    if (categoryData) {
-      setScholarBackRoute({
-        url: `/dars-e-quran/${scholarSlug}/${categorySlug}`,
-        label: categoryData.name,
-      });
-    }
-  };
-
-  const fetchScholarName = async (scholarSlug: string) => {
-    const { data } = await supabase
-      .from("dars_categories")
-      .select("title, href")
-      .eq("href", `/dars-e-quran/${scholarSlug}`)
-      .maybeSingle();
-
-    if (data) {
-      setScholarBackRoute({
-        url: data.href,
-        label: data.title,
-      });
-    }
-  };
 
   const fetchPost = async () => {
     setLoading(true);
@@ -109,26 +58,79 @@ export default function PostDetail() {
 
     if (error || !data) {
       setNotFound(true);
-    } else {
-      setPost(data);
-      
-      // If post category matches a scholar name, set back route
-      if (data.category) {
-        const { data: scholarData } = await supabase
+      setLoading(false);
+      return;
+    }
+    
+    setPost(data);
+    
+    // Determine back route based on post category
+    if (data.category) {
+      await determineBackRoute(data.category);
+    }
+    
+    setLoading(false);
+  };
+
+  const determineBackRoute = async (category: string) => {
+    // First check if category matches a known route
+    if (categoryRoutes[category]) {
+      setBackRoute(categoryRoutes[category]);
+      return;
+    }
+    
+    // Check if category is a scholar (dars_categories)
+    const { data: scholarData } = await supabase
+      .from("dars_categories")
+      .select("title, href")
+      .eq("title", category)
+      .maybeSingle();
+
+    if (scholarData) {
+      setBackRoute({
+        url: scholarData.href,
+        label: scholarData.title,
+      });
+      return;
+    }
+    
+    // Check if category is a subcategory (nested category)
+    const { data: categoryData } = await supabase
+      .from("categories")
+      .select("id, name, slug, parent_id")
+      .eq("name", category)
+      .maybeSingle();
+
+    if (categoryData && categoryData.parent_id) {
+      // It's a subcategory - find the parent (scholar)
+      const { data: parentData } = await supabase
+        .from("categories")
+        .select("name, slug")
+        .eq("id", categoryData.parent_id)
+        .maybeSingle();
+
+      if (parentData) {
+        // Check if parent is a scholar
+        const { data: parentScholar } = await supabase
           .from("dars_categories")
           .select("title, href")
-          .eq("title", data.category)
+          .eq("title", parentData.name)
           .maybeSingle();
 
-        if (scholarData && !scholarBackRoute) {
-          setScholarBackRoute({
-            url: scholarData.href,
-            label: scholarData.title,
+        if (parentScholar) {
+          // Build subcategory URL: /dars-e-quran/scholar-slug/category-slug
+          const scholarSlug = parentScholar.href.replace("/dars-e-quran/", "");
+          setBackRoute({
+            url: `/dars-e-quran/${scholarSlug}/${categoryData.slug}`,
+            label: categoryData.name,
           });
+          return;
         }
       }
     }
-    setLoading(false);
+    
+    // Default fallback
+    setBackRoute({ url: "/posts", label: "Posts" });
   };
 
   if (loading) {
@@ -160,20 +162,8 @@ export default function PostDetail() {
     );
   }
 
-  // Get the back route - prioritize scholar route, then category route
-  const getBackRoute = () => {
-    if (scholarBackRoute) {
-      return scholarBackRoute;
-    }
-    if (post.category && categoryRoutes[post.category]) {
-      return categoryRoutes[post.category];
-    }
-    return { url: "/posts", label: "Posts" };
-  };
-
-  const backRoute = getBackRoute();
-
   const publishedDate = post.published_at
+
     ? new Date(post.published_at).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
