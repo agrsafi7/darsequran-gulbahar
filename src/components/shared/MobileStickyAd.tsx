@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-export function MobileStickyAd() {
+export const MobileStickyAd = forwardRef<HTMLDivElement>((_, ref) => {
   const [adCode, setAdCode] = useState<string | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -61,4 +61,6 @@ export function MobileStickyAd() {
       </div>
     </div>
   );
-}
+});
+
+MobileStickyAd.displayName = "MobileStickyAd";
