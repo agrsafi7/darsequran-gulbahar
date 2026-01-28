@@ -11,111 +11,108 @@
 
 @layer base {
   :root {
-    /* Core Brand Colors - Islamic Inspired */
+    /* Core Brand Colors - Dark Slate Theme */
     --background: 40 30% 98%;
-    --foreground: 160 30% 15%;
+    --foreground: 210 20% 20%;
 
     --card: 40 25% 97%;
-    --card-foreground: 160 30% 15%;
+    --card-foreground: 210 20% 20%;
 
     --popover: 40 25% 97%;
-    --popover-foreground: 160 30% 15%;
+    --popover-foreground: 210 20% 20%;
 
-    /* Primary - Deep Emerald Green (Islamic) */
-    --primary: 160 85% 18%;
-    --primary-foreground: 40 30% 98%;
-    
-    /* Footer - Dark Slate */
-    --footer-bg: 210 18% 35%;
+    /* Primary - Dark Slate (matching footer) */
+    --primary: 210 18% 34%;
+    --primary-foreground: 0 0% 100%;
 
     /* Secondary - Warm Cream */
     --secondary: 40 25% 93%;
-    --secondary-foreground: 160 30% 15%;
+    --secondary-foreground: 210 20% 20%;
 
-    /* Muted - Soft Sage */
-    --muted: 150 15% 90%;
-    --muted-foreground: 160 15% 45%;
+    /* Muted - Soft Gray */
+    --muted: 210 10% 90%;
+    --muted-foreground: 210 15% 45%;
 
     /* Accent - Warm Gold */
     --accent: 42 75% 55%;
-    --accent-foreground: 160 30% 12%;
+    --accent-foreground: 210 20% 15%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 40 30% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 150 15% 85%;
-    --input: 150 15% 85%;
-    --ring: 158 78% 23%;
+    --border: 210 15% 85%;
+    --input: 210 15% 85%;
+    --ring: 210 18% 34%;
 
     --radius: 0.625rem;
 
     /* Extended Palette */
-    --emerald-dark: 160 85% 14%;
-    --emerald-light: 155 45% 88%;
+    --slate-dark: 210 20% 28%;
+    --slate-light: 210 15% 92%;
     --gold-dark: 42 70% 45%;
     --gold-light: 42 65% 92%;
     --cream: 40 30% 96%;
     --cream-dark: 40 20% 88%;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(160 85% 18%) 0%, hsl(160 85% 14%) 50%, hsl(158 80% 22%) 100%);
+    /* Gradients - Dark Slate */
+    --gradient-hero: linear-gradient(135deg, hsl(210 18% 38%) 0%, hsl(210 20% 30%) 50%, hsl(210 18% 35%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(42 75% 55%) 0%, hsl(42 70% 45%) 100%);
-    --gradient-overlay: linear-gradient(180deg, hsla(160 85% 14% / 0.85) 0%, hsla(160 85% 18% / 0.95) 100%);
+    --gradient-overlay: linear-gradient(180deg, hsla(210 20% 28% / 0.9) 0%, hsla(210 18% 34% / 0.95) 100%);
     --gradient-card: linear-gradient(180deg, hsl(40 25% 97%) 0%, hsl(40 20% 94%) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 1px 3px hsla(160 30% 15% / 0.08);
-    --shadow-md: 0 4px 12px hsla(160 30% 15% / 0.1);
-    --shadow-lg: 0 8px 30px hsla(160 30% 15% / 0.12);
+    --shadow-sm: 0 1px 3px hsla(210 20% 15% / 0.08);
+    --shadow-md: 0 4px 12px hsla(210 20% 15% / 0.1);
+    --shadow-lg: 0 8px 30px hsla(210 20% 15% / 0.12);
     --shadow-gold: 0 4px 20px hsla(42 75% 55% / 0.3);
 
-    /* Sidebar */
-    --sidebar-background: 160 85% 14%;
-    --sidebar-foreground: 40 30% 95%;
+    /* Sidebar - Dark Slate */
+    --sidebar-background: 210 20% 28%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 42 75% 55%;
-    --sidebar-primary-foreground: 160 30% 12%;
-    --sidebar-accent: 158 60% 20%;
-    --sidebar-accent-foreground: 40 30% 95%;
-    --sidebar-border: 158 50% 20%;
+    --sidebar-primary-foreground: 210 20% 15%;
+    --sidebar-accent: 210 18% 38%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 210 15% 35%;
     --sidebar-ring: 42 75% 55%;
   }
 
   .dark {
-    --background: 160 30% 8%;
-    --foreground: 40 25% 95%;
+    --background: 210 20% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 160 25% 12%;
-    --card-foreground: 40 25% 95%;
+    --card: 210 20% 14%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 160 25% 12%;
-    --popover-foreground: 40 25% 95%;
+    --popover: 210 20% 14%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 155 65% 45%;
-    --primary-foreground: 160 30% 8%;
+    --primary: 210 18% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 20% 18%;
-    --secondary-foreground: 40 25% 95%;
+    --secondary: 210 15% 20%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 160 15% 20%;
-    --muted-foreground: 150 15% 60%;
+    --muted: 210 15% 22%;
+    --muted-foreground: 210 10% 60%;
 
     --accent: 42 70% 50%;
-    --accent-foreground: 160 30% 8%;
+    --accent-foreground: 210 20% 10%;
 
     --destructive: 0 65% 50%;
-    --destructive-foreground: 40 25% 95%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 160 20% 22%;
-    --input: 160 20% 22%;
-    --ring: 155 65% 45%;
+    --border: 210 15% 25%;
+    --input: 210 15% 25%;
+    --ring: 210 18% 45%;
 
-    --sidebar-background: 160 30% 6%;
-    --sidebar-foreground: 40 25% 95%;
+    --sidebar-background: 210 20% 12%;
+    --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 42 70% 50%;
-    --sidebar-primary-foreground: 160 30% 8%;
-    --sidebar-accent: 160 25% 15%;
-    --sidebar-accent-foreground: 40 25% 95%;
-    --sidebar-border: 160 20% 18%;
+    --sidebar-primary-foreground: 210 20% 10%;
+    --sidebar-accent: 210 18% 20%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 210 15% 22%;
     --sidebar-ring: 42 70% 50%;
   }
 }
@@ -148,13 +145,13 @@
     ) 1;
   }
 
-  /* Hero Section Styles */
+  /* Hero Section Styles - Dark Slate */
   .hero-gradient {
-    background: linear-gradient(135deg, hsl(160 85% 16%) 0%, hsl(160 88% 12%) 50%, hsl(158 80% 18%) 100%);
+    background: linear-gradient(135deg, hsl(210 18% 38%) 0%, hsl(210 20% 30%) 50%, hsl(210 18% 35%) 100%);
   }
 
   .hero-overlay {
-    background: linear-gradient(180deg, hsla(160 88% 12% / 0.85) 0%, hsla(160 85% 16% / 0.95) 100%);
+    background: linear-gradient(180deg, hsla(210 20% 28% / 0.9) 0%, hsla(210 18% 34% / 0.95) 100%);
   }
 
   /* Gold Accent Elements */
