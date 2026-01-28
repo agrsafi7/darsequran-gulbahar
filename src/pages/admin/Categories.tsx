@@ -20,7 +20,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, Tags } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Pencil, Trash2, Loader2, Tags, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,7 +37,12 @@ interface Category {
   slug: string;
   description: string | null;
   sort_order: number;
+  parent_id: string | null;
   created_at: string;
+}
+
+interface CategoryWithChildren extends Category {
+  children: CategoryWithChildren[];
 }
 
 export default function AdminCategories() {
@@ -46,6 +58,7 @@ export default function AdminCategories() {
     slug: "",
     description: "",
     sort_order: 0,
+    parent_id: "",
   });
 
   useEffect(() => {
@@ -92,6 +105,7 @@ export default function AdminCategories() {
       slug: "",
       description: "",
       sort_order: 0,
+      parent_id: "",
     });
     setEditingCategory(null);
   };
@@ -103,6 +117,7 @@ export default function AdminCategories() {
       slug: category.slug,
       description: category.description || "",
       sort_order: category.sort_order,
+      parent_id: category.parent_id || "",
     });
     setDialogOpen(true);
   };
@@ -116,9 +131,21 @@ export default function AdminCategories() {
       slug: formData.slug,
       description: formData.description || null,
       sort_order: formData.sort_order,
+      parent_id: formData.parent_id || null,
     };
 
     if (editingCategory) {
+      // Prevent setting parent to self or its own children
+      if (formData.parent_id === editingCategory.id) {
+        toast({
+          title: "Error",
+          description: "A category cannot be its own parent",
+          variant: "destructive",
+        });
+        setSaving(false);
+        return;
+      }
+
       const { error } = await supabase
         .from("categories")
         .update(payload)
@@ -156,6 +183,17 @@ export default function AdminCategories() {
   };
 
   const handleDelete = async (id: string) => {
+    // Check if category has children
+    const hasChildren = categories.some((c) => c.parent_id === id);
+    if (hasChildren) {
+      toast({
+        title: "Cannot Delete",
+        description: "This category has sub-categories. Please delete or move them first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!confirm("Are you sure you want to delete this category?")) return;
 
     const { error } = await supabase.from("categories").delete().eq("id", id);
@@ -170,6 +208,67 @@ export default function AdminCategories() {
       toast({ title: "Success", description: "Category deleted successfully" });
       fetchCategories();
     }
+  };
+
+  // Build hierarchical structure for display
+  const buildHierarchy = (categories: Category[]): CategoryWithChildren[] => {
+    const map = new Map<string, CategoryWithChildren>();
+    const roots: CategoryWithChildren[] = [];
+
+    // First pass: create all nodes
+    categories.forEach((cat) => {
+      map.set(cat.id, { ...cat, children: [] });
+    });
+
+    // Second pass: build tree
+    categories.forEach((cat) => {
+      const node = map.get(cat.id)!;
+      if (cat.parent_id && map.has(cat.parent_id)) {
+        map.get(cat.parent_id)!.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    return roots;
+  };
+
+  // Flatten hierarchy for table display with indentation info
+  const flattenHierarchy = (
+    nodes: CategoryWithChildren[],
+    depth = 0
+  ): { category: Category; depth: number }[] => {
+    const result: { category: Category; depth: number }[] = [];
+    nodes.forEach((node) => {
+      result.push({ category: node, depth });
+      if (node.children.length > 0) {
+        result.push(...flattenHierarchy(node.children, depth + 1));
+      }
+    });
+    return result;
+  };
+
+  const hierarchicalCategories = buildHierarchy(categories);
+  const flatCategories = flattenHierarchy(hierarchicalCategories);
+
+  // Get available parent categories (exclude self and children when editing)
+  const getAvailableParents = () => {
+    if (!editingCategory) return categories;
+    
+    // Get all descendant IDs
+    const getDescendantIds = (parentId: string): string[] => {
+      const children = categories.filter((c) => c.parent_id === parentId);
+      return children.flatMap((c) => [c.id, ...getDescendantIds(c.id)]);
+    };
+    
+    const excludeIds = new Set([editingCategory.id, ...getDescendantIds(editingCategory.id)]);
+    return categories.filter((c) => !excludeIds.has(c.id));
+  };
+
+  const getParentName = (parentId: string | null) => {
+    if (!parentId) return null;
+    const parent = categories.find((c) => c.id === parentId);
+    return parent?.name || null;
   };
 
   return (
@@ -220,6 +319,31 @@ export default function AdminCategories() {
                     }
                     required
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="parent_id">Parent Category</Label>
+                  <Select
+                    value={formData.parent_id}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, parent_id: value === "none" ? "" : value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="None (Top Level)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None (Top Level)</SelectItem>
+                      {getAvailableParents().map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Select a parent to nest this category under another
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -280,27 +404,39 @@ export default function AdminCategories() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
-                  <TableHead>Description</TableHead>
+                  <TableHead>Parent</TableHead>
                   <TableHead>Order</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.length === 0 ? (
+                {flatCategories.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8">
                       No categories found. Add your first category.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  categories.map((category) => (
+                  flatCategories.map(({ category, depth }) => (
                     <TableRow key={category.id}>
-                      <TableCell className="font-medium">{category.name}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-1">
+                          {depth > 0 && (
+                            <span 
+                              className="text-muted-foreground"
+                              style={{ marginLeft: `${depth * 20}px` }}
+                            >
+                              <ChevronRight className="h-4 w-4 inline" />
+                            </span>
+                          )}
+                          {category.name}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {category.slug}
                       </TableCell>
-                      <TableCell className="text-muted-foreground max-w-xs truncate">
-                        {category.description || "-"}
+                      <TableCell className="text-muted-foreground">
+                        {getParentName(category.parent_id) || "-"}
                       </TableCell>
                       <TableCell>{category.sort_order}</TableCell>
                       <TableCell className="text-right">
