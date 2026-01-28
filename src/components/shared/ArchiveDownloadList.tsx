@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Download, Loader2, Music, Clock, HardDrive } from "lucide-react";
+import { Download, Loader2, Clock, HardDrive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { trackDownload } from "@/lib/analytics";
 
 interface ArchiveFile {
   name: string;
@@ -152,6 +153,7 @@ export function ArchiveDownloadList({ itemId }: ArchiveDownloadListProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 download
+                onClick={() => trackDownload(file.title, 'audio', itemId)}
               >
                 <Download className="h-4 w-4" />
               </a>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PlaylistEmbed } from "./PlaylistEmbed";
 import { supabase } from "@/integrations/supabase/client";
+import { trackDownload } from "@/lib/analytics";
 
 interface ArchiveFile {
   name: string;
@@ -178,6 +179,7 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                     download
+                    onClick={() => trackDownload(file.title, 'audio', itemId)}
                   >
                     <Download className="h-4 w-4" />
                   </a>
@@ -220,6 +222,7 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       download
+                      onClick={() => trackDownload('VBR MP3 ZIP', 'zip', itemId)}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download ZIP
@@ -265,6 +268,7 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                       target="_blank"
                       rel="noopener noreferrer"
                       download
+                      onClick={() => trackDownload('Torrent', 'torrent', itemId)}
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Torrent
