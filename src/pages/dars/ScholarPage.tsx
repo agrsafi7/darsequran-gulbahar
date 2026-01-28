@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { CategoryPostsList } from "@/components/shared/CategoryPostsList";
 import { useParams, Link } from "react-router-dom";
@@ -5,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, User, Folder, ChevronRight } from "lucide-react";
+import { trackContentView } from "@/lib/analytics";
 
 const ScholarPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -51,6 +53,13 @@ const ScholarPage = () => {
     },
     enabled: !!category?.title,
   });
+
+  // Track page view when category loads
+  useEffect(() => {
+    if (category && slug) {
+      trackContentView('scholar', slug, category.title);
+    }
+  }, [category, slug]);
 
   if (isLoading) {
     return (
