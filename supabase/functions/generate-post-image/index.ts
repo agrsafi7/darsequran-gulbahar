@@ -31,17 +31,17 @@ serve(async (req) => {
       throw new Error("IMGBB_API_KEY is not configured. Please add your ImgBB API key.");
     }
 
-    // Create a title card image with the post title as text
-    const imagePrompt = `Create a clean, professional blog title card image with the text "${title}" prominently displayed.
-The image should:
-- Show the title "${title}" as the main focal point, clearly readable
-- Use elegant Islamic-inspired decorative borders or subtle geometric frame
-- Have a solid or gradient background in calming colors (deep blue, emerald green, or warm gold tones)
-- Professional typography, centered text
-- 16:9 aspect ratio suitable for a blog featured image
-- The text must be the exact title: "${title}"
-- Clean, minimal design that highlights the title text
-High quality, sharp text rendering.`;
+    // Create a simple, elegant title card matching the reference style
+    const imagePrompt = `Create a simple, elegant blog title card image with the text "${title}" displayed.
+Style requirements:
+- Dark gradient background transitioning from deep navy blue (top-left) to dark teal/green (bottom-right)
+- Simple thin decorative border/frame in muted gold/tan color with subtle Islamic-inspired corner accents
+- White text "${title}" centered inside the frame, clean professional font
+- Minimal design, NO busy patterns or colorful elements
+- 16:9 aspect ratio
+- The exact text to display: "${title}"
+- Keep it simple and elegant like a professional title card
+High quality, clean rendering.`;
 
     console.log("Generating image with prompt:", imagePrompt);
 
