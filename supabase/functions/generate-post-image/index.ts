@@ -31,17 +31,17 @@ serve(async (req) => {
       throw new Error("IMGBB_API_KEY is not configured. Please add your ImgBB API key.");
     }
 
-    // Create an Islamic-themed prompt based on the post title
-    const imagePrompt = `Create a beautiful, elegant Islamic-themed featured image for a blog post titled "${title}". 
-The image should feature:
-- Elegant Islamic geometric patterns or arabesque designs
-- Soft, calming colors like deep blues, golds, emerald greens, or warm earth tones
-- Subtle calligraphy-inspired decorative elements
-- A peaceful, spiritual atmosphere
-- Professional blog header composition suitable for a 16:9 aspect ratio
-- No text or words in the image
-- High quality, modern and clean design
-Ultra high resolution, professional quality.`;
+    // Create a title card image with the post title as text
+    const imagePrompt = `Create a clean, professional blog title card image with the text "${title}" prominently displayed.
+The image should:
+- Show the title "${title}" as the main focal point, clearly readable
+- Use elegant Islamic-inspired decorative borders or subtle geometric frame
+- Have a solid or gradient background in calming colors (deep blue, emerald green, or warm gold tones)
+- Professional typography, centered text
+- 16:9 aspect ratio suitable for a blog featured image
+- The text must be the exact title: "${title}"
+- Clean, minimal design that highlights the title text
+High quality, sharp text rendering.`;
 
     console.log("Generating image with prompt:", imagePrompt);
 
