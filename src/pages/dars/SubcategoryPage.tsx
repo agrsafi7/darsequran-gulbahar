@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Folder } from "lucide-react";
 import { trackContentView } from "@/lib/analytics";
+import { AdPlaceholder } from "@/components/shared/AdPlaceholder";
 
 const SubcategoryPage = () => {
   const { scholarSlug, categorySlug } = useParams<{ scholarSlug: string; categorySlug: string }>();
@@ -119,16 +120,26 @@ const SubcategoryPage = () => {
         </div>
       </section>
 
-      {/* Posts List Section */}
+      {/* Posts List Section with Sidebar */}
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <CategoryPostsList
-              category={category.name}
-              emptyIcon={<Folder className="w-8 h-8 text-primary-foreground" />}
-              emptyTitle="No Posts Available"
-              emptyMessage={`Check back soon for posts in ${category.name}.`}
-            />
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Main Content */}
+            <div className="flex-1 max-w-4xl">
+              <CategoryPostsList
+                category={category.name}
+                emptyIcon={<Folder className="w-8 h-8 text-primary-foreground" />}
+                emptyTitle="No Posts Available"
+                emptyMessage={`Check back soon for posts in ${category.name}.`}
+              />
+            </div>
+
+            {/* Sidebar Ad */}
+            <aside className="w-full lg:w-80 flex-shrink-0">
+              <div className="sticky top-24">
+                <AdPlaceholder size="square" location="sidebar" label="Sidebar Ad" />
+              </div>
+            </aside>
           </div>
         </div>
       </section>

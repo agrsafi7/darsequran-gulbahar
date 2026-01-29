@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, User, Folder, ChevronRight } from "lucide-react";
 import { trackContentView } from "@/lib/analytics";
+import { AdPlaceholder } from "@/components/shared/AdPlaceholder";
 
 const ScholarPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -128,68 +129,75 @@ const ScholarPage = () => {
         </div>
       </section>
 
-      {/* Subcategories Section - Show if there are subcategories */}
-      {hasSubcategories && (
-        <section className="py-12 lg:py-16 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="font-heading text-2xl md:text-3xl text-foreground mb-6">
-                Browse by Category
-              </h2>
-              {subcategoriesLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full rounded-xl" />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {subcategories.map((subcat) => (
-                    <Link
-                      key={subcat.id}
-                      to={`/dars-e-quran/${slug}/${subcat.slug}`}
-                      className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl hero-gradient flex items-center justify-center flex-shrink-0">
-                          <Folder className="w-6 h-6 text-primary-foreground" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
-                            {subcat.name}
-                          </h3>
-                          {subcat.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-1">
-                              {subcat.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </Link>
-                  ))}
-                </div>
+      {/* Content Section with Sidebar */}
+      <section className="py-12 lg:py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Main Content */}
+            <div className="flex-1 max-w-4xl">
+              {/* Subcategories Section - Show if there are subcategories */}
+              {hasSubcategories && (
+                <>
+                  <h2 className="font-heading text-2xl md:text-3xl text-foreground mb-6">
+                    Browse by Category
+                  </h2>
+                  {subcategoriesLoading ? (
+                    <div className="space-y-3">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {subcategories.map((subcat) => (
+                        <Link
+                          key={subcat.id}
+                          to={`/dars-e-quran/${slug}/${subcat.slug}`}
+                          className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl hero-gradient flex items-center justify-center flex-shrink-0">
+                              <Folder className="w-6 h-6 text-primary-foreground" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                {subcat.name}
+                              </h3>
+                              {subcat.description && (
+                                <p className="text-sm text-muted-foreground line-clamp-1">
+                                  {subcat.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Posts List Section - Show if no subcategories */}
+              {!hasSubcategories && !subcategoriesLoading && (
+                <CategoryPostsList
+                  category={category.title}
+                  emptyIcon={<User className="w-8 h-8 text-primary-foreground" />}
+                  emptyTitle="No Lessons Available"
+                  emptyMessage={`Check back soon for lessons from ${category.title}.`}
+                />
               )}
             </div>
-          </div>
-        </section>
-      )}
 
-      {/* Posts List Section - Show if no subcategories */}
-      {!hasSubcategories && !subcategoriesLoading && (
-        <section className="py-12 lg:py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <CategoryPostsList
-                category={category.title}
-                emptyIcon={<User className="w-8 h-8 text-primary-foreground" />}
-                emptyTitle="No Lessons Available"
-                emptyMessage={`Check back soon for lessons from ${category.title}.`}
-              />
-            </div>
+            {/* Sidebar Ad */}
+            <aside className="w-full lg:w-80 flex-shrink-0">
+              <div className="sticky top-24">
+                <AdPlaceholder size="square" location="sidebar" label="Sidebar Ad" />
+              </div>
+            </aside>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
     </Layout>
   );
 };
