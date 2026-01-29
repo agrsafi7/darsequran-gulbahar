@@ -92,13 +92,13 @@ export function CategoryPostsList({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 max-w-2xl">
       {posts.map((post) => (
         <Link
           key={post.id}
           to={`/post/${post.slug}`}
           state={{ from: location.pathname }}
-          className="block p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors group"
+          className="block p-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors group"
         >
           <div className="flex items-start gap-4">
             {post.featured_image && (
