@@ -24,9 +24,9 @@ const Books = () => {
       {/* Books List with Sidebar */}
       <section className="py-16 lg:py-24">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-8 justify-center">
             {/* Main Content */}
-            <div className="flex-1 max-w-2xl">
+            <div className="w-full max-w-2xl">
               <CategoryPostsList
                 category="Books"
                 emptyIcon={<BookOpen className="w-8 h-8 text-primary-foreground" />}
