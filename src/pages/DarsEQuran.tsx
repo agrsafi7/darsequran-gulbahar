@@ -76,9 +76,9 @@ const DarsEQuran = () => {
       {/* Scholar Categories Section with Sidebar */}
       <section className="py-12 lg:py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-8 justify-center">
             {/* Main Content */}
-            <div className="flex-1 max-w-2xl">
+            <div className="w-full max-w-2xl">
               <h2 className="font-heading text-2xl md:text-3xl text-foreground mb-6">
                 Browse by Scholar
               </h2>

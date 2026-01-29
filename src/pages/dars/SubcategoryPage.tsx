@@ -123,9 +123,9 @@ const SubcategoryPage = () => {
       {/* Posts List Section with Sidebar */}
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-8 justify-center">
             {/* Main Content */}
-            <div className="flex-1 max-w-2xl">
+            <div className="w-full max-w-2xl">
               <CategoryPostsList
                 category={category.name}
                 emptyIcon={<Folder className="w-8 h-8 text-primary-foreground" />}
