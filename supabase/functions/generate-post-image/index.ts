@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +24,11 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    const IMGBB_API_KEY = Deno.env.get("IMGBB_API_KEY");
+    if (!IMGBB_API_KEY) {
+      throw new Error("IMGBB_API_KEY is not configured. Please add your ImgBB API key.");
     }
 
     // Create an Islamic-themed prompt based on the post title
@@ -87,65 +91,48 @@ Ultra high resolution, professional quality.`;
       throw new Error("No image generated from AI");
     }
 
-    // Parse base64 data
+    // Parse base64 data - extract just the base64 content without the data URL prefix
     const base64Match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
     if (!base64Match) {
       throw new Error("Invalid image data format");
     }
 
-    const imageFormat = base64Match[1];
     const base64Content = base64Match[2];
+
+    // Upload to ImgBB
+    const formData = new FormData();
+    formData.append("key", IMGBB_API_KEY);
+    formData.append("image", base64Content);
     
-    // Convert base64 to Uint8Array
-    const binaryString = atob(base64Content);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    // Initialize Supabase client for storage upload
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error("Supabase configuration is missing");
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Generate unique filename
-    const timestamp = Date.now();
+    // Generate a name for the image
     const slugifiedTitle = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
       .substring(0, 50);
-    const filename = `ai-generated/${slugifiedTitle}-${timestamp}.${imageFormat}`;
+    formData.append("name", `${slugifiedTitle}-${Date.now()}`);
 
-    // Upload to Supabase storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("media")
-      .upload(filename, bytes, {
-        contentType: `image/${imageFormat}`,
-        upsert: false,
-      });
+    console.log("Uploading to ImgBB...");
 
-    if (uploadError) {
-      console.error("Storage upload error:", uploadError);
-      throw new Error(`Failed to upload image: ${uploadError.message}`);
+    const imgbbResponse = await fetch("https://api.imgbb.com/1/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const imgbbData = await imgbbResponse.json();
+
+    if (!imgbbResponse.ok || !imgbbData.success) {
+      console.error("ImgBB upload error:", imgbbData);
+      throw new Error(imgbbData.error?.message || "Failed to upload image to ImgBB");
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from("media")
-      .getPublicUrl(filename);
-
-    console.log("Image uploaded successfully:", urlData.publicUrl);
+    const imageUrl = imgbbData.data.url;
+    console.log("Image uploaded successfully to ImgBB:", imageUrl);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        imageUrl: urlData.publicUrl 
+        imageUrl: imageUrl 
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
