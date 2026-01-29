@@ -56,7 +56,7 @@ const SubcategoryPage = () => {
   if (isLoading) {
     return (
       <Layout>
-        <section className="relative py-16 lg:py-24 hero-gradient overflow-hidden">
+        <section className="relative py-10 lg:py-16 hero-gradient overflow-hidden">
           <div className="absolute inset-0 pattern-bg opacity-20" />
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl">
@@ -89,7 +89,7 @@ const SubcategoryPage = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative py-16 lg:py-24 hero-gradient overflow-hidden">
+      <section className="relative py-10 lg:py-16 hero-gradient overflow-hidden">
         <div className="absolute inset-0 pattern-bg opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
@@ -125,7 +125,7 @@ const SubcategoryPage = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Main Content */}
-            <div className="flex-1 max-w-4xl">
+            <div className="flex-1 max-w-2xl">
               <CategoryPostsList
                 category={category.name}
                 emptyIcon={<Folder className="w-8 h-8 text-primary-foreground" />}
