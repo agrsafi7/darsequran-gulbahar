@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { CategoryPostsList } from "@/components/shared/CategoryPostsList";
 import { BookOpen } from "lucide-react";
+import { AdPlaceholder } from "@/components/shared/AdPlaceholder";
 
 const Books = () => {
   return (
@@ -20,16 +21,26 @@ const Books = () => {
         </div>
       </section>
 
-      {/* Books List */}
+      {/* Books List with Sidebar */}
       <section className="py-16 lg:py-24">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <CategoryPostsList
-              category="Books"
-              emptyIcon={<BookOpen className="w-8 h-8 text-primary-foreground" />}
-              emptyTitle="No Books Available"
-              emptyMessage="Check back soon for Islamic literature and books."
-            />
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Main Content */}
+            <div className="flex-1 max-w-4xl">
+              <CategoryPostsList
+                category="Books"
+                emptyIcon={<BookOpen className="w-8 h-8 text-primary-foreground" />}
+                emptyTitle="No Books Available"
+                emptyMessage="Check back soon for Islamic literature and books."
+              />
+            </div>
+
+            {/* Sidebar Ad */}
+            <aside className="w-full lg:w-80 flex-shrink-0">
+              <div className="sticky top-24">
+                <AdPlaceholder size="square" location="sidebar" label="Sidebar Ad" />
+              </div>
+            </aside>
           </div>
         </div>
       </section>
