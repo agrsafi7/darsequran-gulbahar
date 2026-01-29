@@ -14,8 +14,7 @@ import DownloadDars from "./pages/dars/DownloadDars";
 import CompleteDars from "./pages/dars/CompleteDars";
 import ScholarPage from "./pages/dars/ScholarPage";
 import SubcategoryPage from "./pages/dars/SubcategoryPage";
-import Speeches from "./pages/Speeches";
-import Books from "./pages/Books";
+import CategoryPage from "./pages/CategoryPage";
 import Posts from "./pages/Posts";
 import PostDetail from "./pages/PostDetail";
 import PageDetail from "./pages/PageDetail";
@@ -51,14 +50,18 @@ const App = () => (
             <Route path="/posts" element={<Posts />} />
             <Route path="/post/:slug" element={<PostDetail />} />
             <Route path="/page/:slug" element={<PageDetail />} />
+            
+            {/* Dars-e-Quran specific routes */}
             <Route path="/dars-e-quran" element={<DarsEQuran />} />
             <Route path="/dars-e-quran/listen" element={<ListenOnline />} />
             <Route path="/dars-e-quran/download" element={<DownloadDars />} />
             <Route path="/dars-e-quran/complete" element={<CompleteDars />} />
             <Route path="/dars-e-quran/:slug" element={<ScholarPage />} />
             <Route path="/dars-e-quran/:scholarSlug/:categorySlug" element={<SubcategoryPage />} />
-            <Route path="/speeches" element={<Speeches />} />
-            <Route path="/books" element={<Books />} />
+            
+            {/* Dynamic category routes - handles any category with hierarchy */}
+            <Route path="/:slug" element={<CategoryPage />} />
+            <Route path="/:slug/:subSlug" element={<CategoryPage />} />
             
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

@@ -1,0 +1,228 @@
+import { useEffect } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { CategoryPostsList } from "@/components/shared/CategoryPostsList";
+import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Folder, ChevronRight, ArrowLeft } from "lucide-react";
+import { trackContentView } from "@/lib/analytics";
+import { AdPlaceholder } from "@/components/shared/AdPlaceholder";
+
+const CategoryPage = () => {
+  const { slug, subSlug } = useParams<{ slug: string; subSlug?: string }>();
+  const currentSlug = subSlug || slug;
+
+  // Fetch the category from categories table
+  const { data: category, isLoading } = useQuery({
+    queryKey: ["category-page", currentSlug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("slug", currentSlug)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentSlug,
+  });
+
+  // Fetch parent category if this is a subcategory
+  const { data: parentCategory } = useQuery({
+    queryKey: ["parent-category", category?.parent_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("id", category!.parent_id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!category?.parent_id,
+  });
+
+  // Fetch subcategories (children of this category)
+  const { data: subcategories, isLoading: subcategoriesLoading } = useQuery({
+    queryKey: ["category-subcategories", category?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("parent_id", category!.id)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!category?.id,
+  });
+
+  // Track page view when category loads
+  useEffect(() => {
+    if (category && currentSlug) {
+      trackContentView('category', currentSlug, category.name);
+    }
+  }, [category, currentSlug]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <section className="relative py-10 lg:py-16 hero-gradient overflow-hidden">
+          <div className="absolute inset-0 pattern-bg opacity-20" />
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-3xl">
+              <Skeleton className="h-8 w-32 mb-4 bg-primary-foreground/20" />
+              <Skeleton className="h-14 w-64 mb-4 bg-primary-foreground/20" />
+              <Skeleton className="h-8 w-full max-w-xl bg-primary-foreground/20" />
+            </div>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
+
+  if (!category) {
+    return (
+      <Layout>
+        <section className="py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="font-heading text-3xl text-foreground mb-4">Category Not Found</h1>
+            <p className="text-muted-foreground mb-6">The category you're looking for doesn't exist.</p>
+            <Link to="/" className="text-primary hover:underline">
+              ← Back to Home
+            </Link>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
+
+  const hasSubcategories = subcategories && subcategories.length > 0;
+  const isTopLevel = !category.parent_id;
+  const backLink = parentCategory ? `/${parentCategory.slug}` : "/";
+  const backText = parentCategory ? `Back to ${parentCategory.name}` : "Back to Home";
+
+  // Build the URL for subcategory links
+  const getSubcategoryUrl = (subcatSlug: string) => {
+    if (isTopLevel) {
+      return `/${slug}/${subcatSlug}`;
+    }
+    return `/${slug}/${subcatSlug}`;
+  };
+
+  return (
+    <Layout>
+      {/* Hero Section */}
+      <section className="relative py-10 lg:py-16 hero-gradient overflow-hidden">
+        <div className="absolute inset-0 pattern-bg opacity-20" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-3xl">
+            {!isTopLevel && (
+              <Link 
+                to={backLink}
+                className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground mb-4 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {backText}
+              </Link>
+            )}
+            {parentCategory && (
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
+                  <Folder className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <span className="text-primary-foreground/80 font-medium">
+                  {parentCategory.name}
+                </span>
+              </div>
+            )}
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl text-primary-foreground mb-4 text-shadow-lg">
+              {category.name}
+            </h1>
+            {category.description && (
+              <p className="text-lg text-primary-foreground/90 text-shadow">
+                {category.description}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Content Section with Sidebar */}
+      <section className="py-12 lg:py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-8 justify-center">
+            {/* Main Content */}
+            <div className="w-full max-w-2xl">
+              {/* Subcategories Section - Show if there are subcategories */}
+              {hasSubcategories && (
+                <>
+                  <h2 className="font-heading text-2xl md:text-3xl text-foreground mb-6">
+                    Browse by Category
+                  </h2>
+                  {subcategoriesLoading ? (
+                    <div className="space-y-3">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {subcategories.map((subcat) => (
+                        <Link
+                          key={subcat.id}
+                          to={getSubcategoryUrl(subcat.slug)}
+                          className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl hero-gradient flex items-center justify-center flex-shrink-0">
+                              <Folder className="w-6 h-6 text-primary-foreground" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                {subcat.name}
+                              </h3>
+                              {subcat.description && (
+                                <p className="text-sm text-muted-foreground line-clamp-1">
+                                  {subcat.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Posts List Section - Show if no subcategories */}
+              {!hasSubcategories && !subcategoriesLoading && (
+                <CategoryPostsList
+                  category={category.name}
+                  emptyIcon={<Folder className="w-8 h-8 text-primary-foreground" />}
+                  emptyTitle="No Content Available"
+                  emptyMessage={`Check back soon for content in ${category.name}.`}
+                />
+              )}
+            </div>
+
+            {/* Sidebar Ad */}
+            <aside className="w-full lg:w-80 flex-shrink-0">
+              <div className="sticky top-24">
+                <AdPlaceholder size="square" location="sidebar" label="Sidebar Ad" />
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </Layout>
+  );
+};
+
+export default CategoryPage;
