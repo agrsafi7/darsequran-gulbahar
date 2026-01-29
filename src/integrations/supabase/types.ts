@@ -308,6 +308,7 @@ export type Database = {
       }
       navigation_items: {
         Row: {
+          category_id: string | null
           created_at: string
           id: string
           is_visible: boolean
@@ -318,6 +319,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          category_id?: string | null
           created_at?: string
           id?: string
           is_visible?: boolean
@@ -328,6 +330,7 @@ export type Database = {
           url: string
         }
         Update: {
+          category_id?: string | null
           created_at?: string
           id?: string
           is_visible?: boolean
@@ -338,6 +341,13 @@ export type Database = {
           url?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "navigation_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "navigation_items_parent_id_fkey"
             columns: ["parent_id"]

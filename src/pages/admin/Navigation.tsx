@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Loader2, GripVertical, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GripVertical, ChevronRight, FolderTree } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -39,12 +39,21 @@ interface NavigationItem {
   parent_id: string | null;
   sort_order: number;
   is_visible: boolean;
+  category_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  parent_id: string | null;
+}
+
 export default function AdminNavigation() {
   const [items, setItems] = useState<NavigationItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -55,6 +64,7 @@ export default function AdminNavigation() {
     parent_id: "",
     sort_order: 0,
     is_visible: true,
+    category_id: "",
   });
   const { toast } = useToast();
 
@@ -75,11 +85,45 @@ export default function AdminNavigation() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, slug, parent_id")
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
   useEffect(() => {
     fetchItems();
+    fetchCategories();
   }, []);
 
   const parentItems = items.filter((item) => !item.parent_id);
+
+  // Build category label with hierarchy
+  const getCategoryLabel = (cat: Category): string => {
+    if (!cat.parent_id) return cat.name;
+    const parent = categories.find(c => c.id === cat.parent_id);
+    if (parent) {
+      const grandparent = parent.parent_id ? categories.find(c => c.id === parent.parent_id) : null;
+      if (grandparent) {
+        return `${grandparent.name} → ${parent.name} → ${cat.name}`;
+      }
+      return `${parent.name} → ${cat.name}`;
+    }
+    return cat.name;
+  };
+
+  // Get child count for a category
+  const getChildCount = (categoryId: string): number => {
+    return categories.filter(c => c.parent_id === categoryId).length;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +136,7 @@ export default function AdminNavigation() {
         parent_id: formData.parent_id || null,
         sort_order: formData.sort_order,
         is_visible: formData.is_visible,
+        category_id: formData.category_id || null,
       };
 
       if (editingItem) {
@@ -132,6 +177,7 @@ export default function AdminNavigation() {
       parent_id: item.parent_id || "",
       sort_order: item.sort_order,
       is_visible: item.is_visible,
+      category_id: item.category_id || "",
     });
     setDialogOpen(true);
   };
@@ -173,6 +219,7 @@ export default function AdminNavigation() {
       parent_id: "",
       sort_order: 0,
       is_visible: true,
+      category_id: "",
     });
   };
 
@@ -180,8 +227,15 @@ export default function AdminNavigation() {
     return items.filter((item) => item.parent_id === parentId);
   };
 
+  const getCategoryName = (categoryId: string | null) => {
+    if (!categoryId) return null;
+    const cat = categories.find(c => c.id === categoryId);
+    return cat?.name;
+  };
+
   const renderItem = (item: NavigationItem, isChild = false) => {
     const children = getChildItems(item.id);
+    const linkedCategory = getCategoryName(item.category_id);
 
     return (
       <>
@@ -191,6 +245,12 @@ export default function AdminNavigation() {
               <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
               {isChild && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
               <span className={isChild ? "text-sm" : "font-medium"}>{item.title}</span>
+              {linkedCategory && (
+                <Badge variant="outline" className="text-xs gap-1">
+                  <FolderTree className="h-3 w-3" />
+                  {linkedCategory}
+                </Badge>
+              )}
             </div>
           </TableCell>
           <TableCell className="text-muted-foreground">{item.url}</TableCell>
@@ -244,7 +304,7 @@ export default function AdminNavigation() {
                 Add Item
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>
                   {editingItem ? "Edit Navigation Item" : "Add Navigation Item"}
@@ -294,6 +354,40 @@ export default function AdminNavigation() {
                             {item.title}
                           </SelectItem>
                         ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category_id">
+                    Link to Category (optional)
+                    <span className="text-xs text-muted-foreground ml-2">
+                      Subcategories will appear as dropdown items
+                    </span>
+                  </Label>
+                  <Select
+                    value={formData.category_id}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, category_id: value === "none" ? "" : value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="No category link" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No category link</SelectItem>
+                      {categories.map((cat) => {
+                        const childCount = getChildCount(cat.id);
+                        return (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {getCategoryLabel(cat)}
+                            {childCount > 0 && (
+                              <span className="text-muted-foreground ml-1">
+                                ({childCount} subcategories)
+                              </span>
+                            )}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
