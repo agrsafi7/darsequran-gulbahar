@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { useNavigation, NavigationItem } from "@/hooks/useNavigation";
+import { siteConfig } from "@/lib/siteConfig";
 
 // Fallback navigation when database is unavailable
 const fallbackNavigation: NavigationItem[] = [
@@ -39,19 +40,19 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between lg:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
+          <a href={siteConfig.domain} className="flex items-center gap-2 sm:gap-3 group">
             <img 
               src={logo} 
-              alt="DarseQuran Gulbahar Peshawar" 
+              alt={siteConfig.name} 
               className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain"
             />
             <div>
               <h1 className="font-heading text-sm sm:text-lg lg:text-xl text-primary leading-tight">
-                DarseQuran Gulbahar Peshawar
+                {siteConfig.name}
               </h1>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">مرکز اشاعت القرآن گلبہار</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">{siteConfig.subtitle}</p>
             </div>
-          </Link>
+          </a>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center">
@@ -95,16 +96,29 @@ export function Header() {
                         </>
                       ) : (
                         <NavigationMenuLink asChild>
-                          <Link
-                            to={item.href}
-                            className={cn(
-                              "nav-link inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
-                              "hover:bg-secondary/50 hover:text-primary focus:bg-secondary/50",
-                              isActive(item.href) && "text-primary font-semibold active"
-                            )}
-                          >
-                            {item.title}
-                          </Link>
+                          {item.href === "/" ? (
+                            <a
+                              href={siteConfig.domain}
+                              className={cn(
+                                "nav-link inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                                "hover:bg-secondary/50 hover:text-primary focus:bg-secondary/50",
+                                isActive(item.href) && "text-primary font-semibold active"
+                              )}
+                            >
+                              {item.title}
+                            </a>
+                          ) : (
+                            <Link
+                              to={item.href}
+                              className={cn(
+                                "nav-link inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                                "hover:bg-secondary/50 hover:text-primary focus:bg-secondary/50",
+                                isActive(item.href) && "text-primary font-semibold active"
+                              )}
+                            >
+                              {item.title}
+                            </Link>
+                          )}
                         </NavigationMenuLink>
                       )}
                     </NavigationMenuItem>
@@ -175,6 +189,18 @@ export function Header() {
                           </ul>
                         )}
                       </div>
+                    ) : item.href === "/" ? (
+                      <a
+                        href={siteConfig.domain}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={cn(
+                          "block rounded-md px-4 py-3 text-sm font-medium transition-colors",
+                          "hover:bg-secondary/50 hover:text-primary",
+                          isActive(item.href) && "text-primary font-semibold bg-secondary/30"
+                        )}
+                      >
+                        {item.title}
+                      </a>
                     ) : (
                       <Link
                         to={item.href}

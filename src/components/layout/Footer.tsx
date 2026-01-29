@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { Facebook, Youtube, Mail, MessageCircle } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { siteConfig } from "@/lib/siteConfig";
 
 const navigationLinks = [
-  { title: "Home", href: "/" },
+  { title: "Home", href: siteConfig.domain },
   { title: "About Us", href: "/about" },
   { title: "Dars-e-Quran", href: "/dars-e-quran" },
   { title: "Speeches", href: "/speeches" },
@@ -28,17 +29,17 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           {/* Left Column - Logo & Description */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-3 group">
+            <a href={siteConfig.domain} className="flex items-center gap-3 group">
               <img 
                 src={logo} 
-                alt="DarseQuran Gulbahar Peshawar" 
+                alt={siteConfig.name} 
                 className="w-14 h-14 object-contain bg-white rounded-full p-1"
               />
               <div>
-                <h2 className="font-heading text-lg text-primary-foreground">DarseQuran Gulbahar Peshawar</h2>
-                <p className="text-xs text-primary-foreground/60">مرکز اشاعت القرآن گلبہار</p>
+                <h2 className="font-heading text-lg text-primary-foreground">{siteConfig.name}</h2>
+                <p className="text-xs text-primary-foreground/60">{siteConfig.subtitle}</p>
               </div>
-            </Link>
+            </a>
             <p className="text-sm text-primary-foreground/80 leading-relaxed max-w-sm">
               Spreading the true meaning of Quran in simple method and interpreting Islam 
               according to the teachings of Quran and Sunnah in Pashto and Urdu languages.
@@ -52,12 +53,21 @@ export function Footer() {
               <ul className="grid grid-cols-2 gap-2">
                 {navigationLinks.map((link) => (
                   <li key={link.title}>
-                    <Link
-                      to={link.href}
-                      className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200 inline-block py-1"
-                    >
-                      {link.title}
-                    </Link>
+                    {link.href.startsWith("http") ? (
+                      <a
+                        href={link.href}
+                        className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200 inline-block py-1"
+                      >
+                        {link.title}
+                      </a>
+                    ) : (
+                      <Link
+                        to={link.href}
+                        className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200 inline-block py-1"
+                      >
+                        {link.title}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
