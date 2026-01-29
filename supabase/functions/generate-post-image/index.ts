@@ -32,16 +32,19 @@ serve(async (req) => {
     }
 
     // Create a simple, elegant title card matching the reference style
-    const imagePrompt = `Create a simple, elegant blog title card image with the text "${title}" displayed.
-Style requirements:
-- Dark gradient background transitioning from deep navy blue (top-left) to dark teal/green (bottom-right)
-- Simple thin decorative border/frame in muted gold/tan color with subtle Islamic-inspired corner accents
-- White text "${title}" centered inside the frame, clean professional font
-- Minimal design, NO busy patterns or colorful elements
+    const imagePrompt = `Create a simple, elegant title card image.
+
+CRITICAL TEXT INSTRUCTION: Display ONLY this exact text, nothing else: "${title}"
+Do NOT add, remove, or change any words. Use the title exactly as provided above.
+
+Style:
+- Dark gradient background from deep navy blue (top-left) to dark teal/green (bottom-right)
+- Simple thin decorative border in muted gold/tan with subtle corner accents
+- White text centered inside the frame
+- Minimal design, NO busy patterns
 - 16:9 aspect ratio
-- The exact text to display: "${title}"
-- Keep it simple and elegant like a professional title card
-High quality, clean rendering.`;
+
+The ONLY text in the image must be exactly: "${title}"`;
 
     console.log("Generating image with prompt:", imagePrompt);
 
