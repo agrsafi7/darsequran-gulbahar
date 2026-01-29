@@ -37,14 +37,11 @@ interface Post {
   created_at: string;
 }
 
-// Map categories to their respective URLs and labels
-const categoryRoutes: Record<string, { url: string; label: string }> = {
+// Special routes that have custom URLs (not following /{slug} pattern)
+const specialRoutes: Record<string, { url: string; label: string }> = {
   "Listen Online": { url: "/dars-e-quran/listen", label: "Listen Online" },
   "Download": { url: "/dars-e-quran/download", label: "Download Dars" },
   "Complete Dars": { url: "/dars-e-quran/complete", label: "Complete Dars" },
-  "Speeches": { url: "/speeches", label: "Speeches" },
-  "Books": { url: "/books", label: "Books" },
-  "Dars-e-Quran": { url: "/dars-e-quran", label: "Dars-e-Quran" },
 };
 
 export default function PostDetail() {
@@ -92,64 +89,74 @@ export default function PostDetail() {
   };
 
   const determineBackRoute = async (category: string) => {
-    // First check if category matches a known route
-    if (categoryRoutes[category]) {
-      setBackRoute(categoryRoutes[category]);
+    // First check if category matches a special route
+    if (specialRoutes[category]) {
+      setBackRoute(specialRoutes[category]);
       return;
     }
     
-    // Check if category is a scholar (dars_categories)
-    const { data: scholarData } = await supabase
-      .from("dars_categories")
-      .select("title, href")
-      .eq("title", category)
-      .maybeSingle();
-
-    if (scholarData) {
-      setBackRoute({
-        url: scholarData.href,
-        label: scholarData.title,
-      });
-      return;
-    }
-    
-    // Check if category is a subcategory (nested category)
+    // Look up the category in the categories table
     const { data: categoryData } = await supabase
       .from("categories")
       .select("id, name, slug, parent_id")
       .eq("name", category)
       .maybeSingle();
 
-    if (categoryData && categoryData.parent_id) {
-      // It's a subcategory - find the parent (scholar)
+    if (!categoryData) {
+      // Category not found, fallback to posts
+      setBackRoute({ url: "/posts", label: "Posts" });
+      return;
+    }
+
+    // Build the URL path by traversing up the parent hierarchy
+    const buildCategoryPath = async (cat: { id: string; name: string; slug: string; parent_id: string | null }): Promise<{ url: string; label: string }> => {
+      if (!cat.parent_id) {
+        // This is a top-level category
+        return { url: `/${cat.slug}`, label: cat.name };
+      }
+
+      // Find the parent category
       const { data: parentData } = await supabase
         .from("categories")
-        .select("name, slug")
-        .eq("id", categoryData.parent_id)
+        .select("id, name, slug, parent_id")
+        .eq("id", cat.parent_id)
         .maybeSingle();
 
-      if (parentData) {
-        // Check if parent is a scholar
-        const { data: parentScholar } = await supabase
-          .from("dars_categories")
-          .select("title, href")
-          .eq("title", parentData.name)
+      if (!parentData) {
+        return { url: `/${cat.slug}`, label: cat.name };
+      }
+
+      // Check if parent is "Dars-e-Quran" (special case with its own route structure)
+      if (parentData.slug === "dars-e-quran") {
+        return { url: `/dars-e-quran/${cat.slug}`, label: cat.name };
+      }
+
+      // Check if grandparent exists (for deeper nesting under dars-e-quran)
+      if (parentData.parent_id) {
+        const { data: grandparentData } = await supabase
+          .from("categories")
+          .select("slug")
+          .eq("id", parentData.parent_id)
           .maybeSingle();
 
-        if (parentScholar) {
-          // Build subcategory URL: /dars-e-quran/scholar-slug/category-slug
-          const scholarSlug = parentScholar.href.replace("/dars-e-quran/", "");
-          setBackRoute({
-            url: `/dars-e-quran/${scholarSlug}/${categoryData.slug}`,
-            label: categoryData.name,
-          });
-          return;
+        if (grandparentData?.slug === "dars-e-quran") {
+          // This is a subcategory under a scholar
+          return { url: `/dars-e-quran/${parentData.slug}/${cat.slug}`, label: cat.name };
         }
       }
-    }
-    
-    // Default fallback
-    setBackRoute({ url: "/posts", label: "Posts" });
+
+      // For other hierarchies, build URL as /{parent-slug}/{category-slug}
+      if (!parentData.parent_id) {
+        // Parent is top-level
+        return { url: `/${parentData.slug}/${cat.slug}`, label: cat.name };
+      }
+
+      // Default: just use the category slug
+      return { url: `/${cat.slug}`, label: cat.name };
+    };
+
+    const route = await buildCategoryPath(categoryData);
+    setBackRoute(route);
   };
 
   if (loading) {
