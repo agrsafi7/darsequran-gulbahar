@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Loader2, CalendarIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, CalendarIcon, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -73,6 +73,7 @@ export default function AdminPosts() {
   const [darsCategories, setDarsCategories] = useState<DarsCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [formData, setFormData] = useState({
@@ -89,6 +90,53 @@ export default function AdminPosts() {
     published_at: null as Date | null,
   });
   const { toast } = useToast();
+
+  const handleGenerateImage = async () => {
+    if (!formData.title.trim()) {
+      toast({
+        title: "Title Required",
+        description: "Please enter a post title first to generate an image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setGeneratingImage(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-post-image`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ title: formData.title }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate image");
+      }
+
+      setFormData((prev) => ({ ...prev, featured_image: data.imageUrl }));
+      toast({
+        title: "Image Generated",
+        description: "AI has created an Islamic-themed image for your post.",
+      });
+    } catch (error: any) {
+      console.error("Error generating image:", error);
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Could not generate image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -388,17 +436,46 @@ export default function AdminPosts() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="featured_image">Featured Image URL</Label>
-                  <Input
-                    id="featured_image"
-                    value={formData.featured_image}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        featured_image: e.target.value,
-                      }))
-                    }
-                    placeholder="https://..."
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="featured_image"
+                      value={formData.featured_image}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          featured_image: e.target.value,
+                        }))
+                      }
+                      placeholder="https://..."
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleGenerateImage}
+                      disabled={generatingImage || !formData.title.trim()}
+                      title="Generate Islamic-themed image using AI"
+                    >
+                      {generatingImage ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-4 w-4" />
+                      )}
+                      <span className="ml-2 hidden sm:inline">Generate</span>
+                    </Button>
+                  </div>
+                  {formData.featured_image && (
+                    <div className="mt-2 rounded-md overflow-hidden border">
+                      <img 
+                        src={formData.featured_image} 
+                        alt="Featured preview" 
+                        className="w-full h-32 object-cover"
+                      />
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Enter URL or click Generate to create an AI image based on the title.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="playlist_embed_url">Playlist Embed URL (Optional)</Label>
