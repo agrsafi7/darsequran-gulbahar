@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect, forwardRef, useRef } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -14,14 +14,35 @@ export const MobileStickyAd = forwardRef<HTMLDivElement>((_, ref) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [renderKey, setRenderKey] = useState(0);
+  const adRenderedRef = useRef(false);
+  const adContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchAdSettings();
   }, []);
 
   useEffect(() => {
-    setRenderKey((k) => k + 1);
+    if (!adCode || !isEnabled || isDismissed || adRenderedRef.current) return;
+    
+    const unit = parseAdSenseUnitFromCode(adCode);
+    const clientId = extractAdSenseClientIdFromCode(adCode);
+    
+    if (!unit || !clientId || !adContainerRef.current) return;
+    
+    const attemptRender = () => {
+      if (adRenderedRef.current || !adContainerRef.current) return;
+      
+      const rect = adContainerRef.current.getBoundingClientRect();
+      if (rect.width > 0) {
+        ensureAdSenseScript(clientId);
+        renderAdSenseUnit(adContainerRef.current, unit);
+        adRenderedRef.current = true;
+      } else {
+        requestAnimationFrame(attemptRender);
+      }
+    };
+    
+    requestAnimationFrame(attemptRender);
   }, [adCode, isEnabled, isDismissed]);
 
   const fetchAdSettings = async () => {
@@ -71,13 +92,8 @@ export const MobileStickyAd = forwardRef<HTMLDivElement>((_, ref) => {
         {/* Ad content */}
         {unit && clientId ? (
           <div
-            key={renderKey}
             className="p-2 flex items-center justify-center min-h-[60px]"
-            ref={(el) => {
-              if (!el) return;
-              ensureAdSenseScript(clientId);
-              renderAdSenseUnit(el, unit);
-            }}
+            ref={adContainerRef}
           />
         ) : (
           <div
