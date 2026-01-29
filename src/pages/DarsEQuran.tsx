@@ -22,18 +22,25 @@ const DarsEQuran = () => {
     },
   });
 
-  // Fetch scholar categories from dars_categories
+  // Fetch scholar categories from categories table (children of Dars-e-Quran)
   const { data: scholars, isLoading: scholarsLoading } = useQuery({
-    queryKey: ["dars-categories"],
+    queryKey: ["dars-e-quran-scholars"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("dars_categories")
+      // First find the Dars-e-Quran parent category
+      const { data: allCategories, error } = await supabase
+        .from("categories")
         .select("*")
-        .eq("is_visible", true)
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
-      return data;
+      if (!allCategories) return [];
+
+      // Find the Dars-e-Quran parent category
+      const darsParent = allCategories.find(cat => cat.slug === "dars-e-quran");
+      if (!darsParent) return [];
+
+      // Get direct children (scholars) of Dars-e-Quran
+      return allCategories.filter(cat => cat.parent_id === darsParent.id);
     },
   });
 
@@ -93,7 +100,7 @@ const DarsEQuran = () => {
                   {scholars.map((scholar) => (
                     <Link
                       key={scholar.id}
-                      to={scholar.href}
+                      to={`/dars-e-quran/${scholar.slug}`}
                       className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-muted transition-colors group"
                     >
                       <div className="flex items-center gap-4">
@@ -102,7 +109,7 @@ const DarsEQuran = () => {
                         </div>
                         <div>
                           <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
-                            {scholar.title}
+                            {scholar.name}
                           </h3>
                           {scholar.description && (
                             <p className="text-sm text-muted-foreground line-clamp-1">

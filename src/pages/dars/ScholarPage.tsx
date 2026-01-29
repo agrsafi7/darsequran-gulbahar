@@ -12,14 +12,14 @@ import { AdPlaceholder } from "@/components/shared/AdPlaceholder";
 const ScholarPage = () => {
   const { slug } = useParams<{ slug: string }>();
 
-  // Fetch the category details from dars_categories based on href
+  // Fetch the scholar category from categories table
   const { data: category, isLoading } = useQuery({
-    queryKey: ["dars-category", slug],
+    queryKey: ["scholar-category", slug],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("dars_categories")
+        .from("categories")
         .select("*")
-        .eq("href", `/dars-e-quran/${slug}`)
+        .eq("slug", slug)
         .maybeSingle();
 
       if (error) throw error;
@@ -28,37 +28,26 @@ const ScholarPage = () => {
     enabled: !!slug,
   });
 
-  // Fetch subcategories from categories table that match this scholar
+  // Fetch subcategories (children of this scholar category)
   const { data: subcategories, isLoading: subcategoriesLoading } = useQuery({
-    queryKey: ["scholar-subcategories", category?.title],
+    queryKey: ["scholar-subcategories", category?.id],
     queryFn: async () => {
-      // First find the parent category that matches the scholar name
-      const { data: allCategories, error } = await supabase
+      const { data, error } = await supabase
         .from("categories")
-        .select("id, name, slug, parent_id, sort_order, description")
+        .select("*")
+        .eq("parent_id", category!.id)
         .order("sort_order", { ascending: true });
 
-      if (error || !allCategories) return [];
-
-      // Find parent category matching scholar name
-      const scholarNameLower = category!.title.toLowerCase();
-      const parentCategory = allCategories.find(cat => 
-        cat.name.toLowerCase().includes(scholarNameLower) ||
-        scholarNameLower.includes(cat.name.toLowerCase())
-      );
-
-      if (!parentCategory) return [];
-
-      // Get child categories
-      return allCategories.filter(cat => cat.parent_id === parentCategory.id);
+      if (error) throw error;
+      return data || [];
     },
-    enabled: !!category?.title,
+    enabled: !!category?.id,
   });
 
   // Track page view when category loads
   useEffect(() => {
     if (category && slug) {
-      trackContentView('scholar', slug, category.title);
+      trackContentView('scholar', slug, category.name);
     }
   }, [category, slug]);
 
@@ -120,11 +109,13 @@ const ScholarPage = () => {
               </span>
             </div>
             <h1 className="font-heading text-4xl md:text-5xl text-primary-foreground mb-4 text-shadow-lg">
-              {category.title}
+              {category.name}
             </h1>
-            <p className="text-lg text-primary-foreground/90 text-shadow">
-              {category.description}
-            </p>
+            {category.description && (
+              <p className="text-lg text-primary-foreground/90 text-shadow">
+                {category.description}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -181,10 +172,10 @@ const ScholarPage = () => {
               {/* Posts List Section - Show if no subcategories */}
               {!hasSubcategories && !subcategoriesLoading && (
                 <CategoryPostsList
-                  category={category.title}
+                  category={category.name}
                   emptyIcon={<User className="w-8 h-8 text-primary-foreground" />}
                   emptyTitle="No Lessons Available"
-                  emptyMessage={`Check back soon for lessons from ${category.title}.`}
+                  emptyMessage={`Check back soon for lessons from ${category.name}.`}
                 />
               )}
             </div>
