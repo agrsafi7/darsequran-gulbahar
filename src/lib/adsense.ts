@@ -4,6 +4,7 @@ type AdSenseParsedUnit = {
   format?: string;
   fullWidthResponsive?: string;
   style?: string;
+  layoutKey?: string;
 };
 
 declare global {
@@ -40,13 +41,14 @@ export function parseAdSenseUnitFromCode(code: string): AdSenseParsedUnit | null
     format: getAttr(insTag, "data-ad-format"),
     fullWidthResponsive: getAttr(insTag, "data-full-width-responsive"),
     style: getAttr(insTag, "style"),
+    layoutKey: getAttr(insTag, "data-ad-layout-key"),
   };
 }
 
 export function ensureAdSenseScript(clientId: string) {
   if (typeof document === "undefined") return;
   const existing = document.querySelector<HTMLScriptElement>(
-    `script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"][src*="client=${clientId}"]`
+    `script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]`
   );
   if (existing) return;
 
@@ -58,26 +60,40 @@ export function ensureAdSenseScript(clientId: string) {
 }
 
 export function renderAdSenseUnit(container: HTMLElement, unit: AdSenseParsedUnit) {
+  // Check if container already has an ad
+  if (container.querySelector('.adsbygoogle[data-adsbygoogle-status]')) {
+    return; // Ad already rendered
+  }
+  
   // Clear previous renders
   container.innerHTML = "";
 
   const ins = document.createElement("ins");
   ins.className = "adsbygoogle";
-  // Keep provided style if present, otherwise ensure block display.
-  ins.setAttribute("style", unit.style || "display:block");
+  
+  // Set style for proper sizing - ensure minimum width for responsive ads
+  const baseStyle = "display:block;min-width:300px;";
+  ins.setAttribute("style", unit.style ? `${baseStyle}${unit.style}` : baseStyle);
+  
   if (unit.client) ins.setAttribute("data-ad-client", unit.client);
   if (unit.slot) ins.setAttribute("data-ad-slot", unit.slot);
   if (unit.format) ins.setAttribute("data-ad-format", unit.format);
   if (unit.fullWidthResponsive)
     ins.setAttribute("data-full-width-responsive", unit.fullWidthResponsive);
+  if (unit.layoutKey)
+    ins.setAttribute("data-ad-layout-key", unit.layoutKey);
 
   container.appendChild(ins);
 
-  // Trigger render
+  // Trigger render with a small delay to ensure DOM is ready
   window.adsbygoogle = window.adsbygoogle || [];
-  try {
-    window.adsbygoogle.push({});
-  } catch {
-    // If AdSense blocks rendering (domain not ready, adblock, etc.), fail silently.
-  }
+  
+  // Use setTimeout to ensure the element is in the DOM and has layout
+  setTimeout(() => {
+    try {
+      window.adsbygoogle?.push({});
+    } catch {
+      // If AdSense blocks rendering (domain not ready, adblock, etc.), fail silently.
+    }
+  }, 100);
 }

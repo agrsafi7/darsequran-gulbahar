@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,18 @@ import { ContentSidebar } from "@/components/shared/ContentSidebar";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackContentView } from "@/lib/analytics";
+
+// Track post view in database (debounced to avoid duplicate views)
+const trackPostView = async (postId: string) => {
+  try {
+    await supabase.from("post_views").insert({
+      post_id: postId,
+    });
+  } catch (error) {
+    // Silently fail - view tracking is non-critical
+    console.error("Failed to track view:", error);
+  }
+};
 
 interface Post {
   id: string;
@@ -65,8 +77,11 @@ export default function PostDetail() {
     
     setPost(data);
     
-    // Track page view
+    // Track page view in GA4
     trackContentView('post', data.slug, data.title);
+    
+    // Track view in database for internal analytics
+    trackPostView(data.id);
     
     // Determine back route based on post category
     if (data.category) {

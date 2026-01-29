@@ -39,8 +39,9 @@ export function AdPlaceholder({ size, location, className, label = "Advertisemen
   const [adCode, setAdCode] = useState<string | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [renderKey, setRenderKey] = useState(0);
-  const [adRendered, setAdRendered] = useState(false);
+  const adRenderedRef = useRef(false);
+  const adContainerRef = useRef<HTMLDivElement | null>(null);
+  const uniqueIdRef = useRef(`ad-${location}-${Math.random().toString(36).substr(2, 9)}`);
   
   // Lazy loading: only load ad when visible
   const [containerRef, isVisible] = useIntersectionObserver<HTMLDivElement>({
@@ -51,12 +52,6 @@ export function AdPlaceholder({ size, location, className, label = "Advertisemen
   useEffect(() => {
     fetchAdSettings();
   }, [location]);
-
-  // When adCode changes, bump key to ensure the container effect re-runs cleanly.
-  useEffect(() => {
-    setRenderKey((k) => k + 1);
-    setAdRendered(false);
-  }, [adCode, isEnabled]);
 
   const fetchAdSettings = async () => {
     const keys = locationToSettingKey[location];
@@ -77,18 +72,36 @@ export function AdPlaceholder({ size, location, className, label = "Advertisemen
     setLoading(false);
   };
 
-  const adContainerRef = useCallback((el: HTMLDivElement | null) => {
-    if (!el || adRendered) return;
+  // Render ad when visible and container is ready
+  useEffect(() => {
+    if (!isVisible || adRenderedRef.current || !adCode || !isEnabled) return;
     
-    const unit = parseAdSenseUnitFromCode(adCode || "");
-    const clientId = extractAdSenseClientIdFromCode(adCode || "");
+    const unit = parseAdSenseUnitFromCode(adCode);
+    const clientId = extractAdSenseClientIdFromCode(adCode);
     
-    if (unit && clientId) {
-      ensureAdSenseScript(clientId);
-      renderAdSenseUnit(el, unit);
-      setAdRendered(true);
-    }
-  }, [adCode, adRendered]);
+    if (!unit || !clientId || !adContainerRef.current) return;
+    
+    // Wait for the container to have a positive width
+    const container = adContainerRef.current;
+    
+    const attemptRender = () => {
+      if (adRenderedRef.current) return;
+      
+      const rect = container.getBoundingClientRect();
+      if (rect.width > 0) {
+        ensureAdSenseScript(clientId);
+        renderAdSenseUnit(container, unit);
+        adRenderedRef.current = true;
+      } else {
+        // Retry after a short delay
+        requestAnimationFrame(attemptRender);
+      }
+    };
+    
+    // Use requestAnimationFrame to ensure layout is complete
+    requestAnimationFrame(attemptRender);
+    
+  }, [isVisible, adCode, isEnabled]);
 
   // Determine if we should render the ad
   const shouldRender = lazy ? isVisible : true;
@@ -103,15 +116,16 @@ export function AdPlaceholder({ size, location, className, label = "Advertisemen
       return (
         <div
           ref={containerRef}
-          className={cn("ad-container min-h-[90px]", className)}
+          className={cn("ad-container min-h-[90px] w-full", className)}
           role="complementary"
           aria-label={label}
         >
           {shouldRender && (
             <div
-              key={renderKey}
+              id={uniqueIdRef.current}
               ref={adContainerRef}
-              className="w-full"
+              className="w-full min-w-[300px]"
+              style={{ minHeight: '90px' }}
             />
           )}
         </div>

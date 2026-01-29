@@ -383,6 +383,38 @@ export type Database = {
         }
         Relationships: []
       }
+      post_views: {
+        Row: {
+          id: string
+          post_id: string
+          user_agent: string | null
+          viewed_at: string
+          viewer_ip: string | null
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_agent?: string | null
+          viewed_at?: string
+          viewer_ip?: string | null
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_agent?: string | null
+          viewed_at?: string
+          viewer_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_views_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           archive_item_id: string | null
@@ -508,7 +540,23 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      post_view_counts: {
+        Row: {
+          last_viewed: string | null
+          post_id: string | null
+          total_views: number | null
+          unique_days: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_views_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {

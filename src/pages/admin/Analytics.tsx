@@ -3,7 +3,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { FileText, Newspaper, MessageSquare, TrendingUp, Calendar, Users, Eye } from "lucide-react";
+import { FileText, Newspaper, MessageSquare, TrendingUp, Calendar, Users, Eye, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
@@ -15,6 +15,7 @@ interface ContentStats {
   publishedPosts: number;
   draftPosts: number;
   scheduledPosts: number;
+  totalViews: number;
 }
 
 interface PostWithCategory {
@@ -24,6 +25,15 @@ interface PostWithCategory {
   status: string;
   published_at: string | null;
   created_at: string;
+  slug: string;
+}
+
+interface PopularPost {
+  id: string;
+  title: string;
+  slug: string;
+  category: string | null;
+  views: number;
 }
 
 interface CategoryData {
@@ -47,6 +57,7 @@ const CHART_COLORS = [
 export default function Analytics() {
   const [stats, setStats] = useState<ContentStats | null>(null);
   const [recentPosts, setRecentPosts] = useState<PostWithCategory[]>([]);
+  const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
   const [dailyData, setDailyData] = useState<DailyData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,11 +69,12 @@ export default function Analytics() {
   const fetchAnalytics = async () => {
     try {
       // Fetch counts in parallel
-      const [postsRes, pagesRes, commentsRes, allPostsRes] = await Promise.all([
+      const [postsRes, pagesRes, commentsRes, allPostsRes, viewsRes] = await Promise.all([
         supabase.from("posts").select("id, status", { count: "exact" }),
         supabase.from("pages").select("id", { count: "exact", head: true }),
         supabase.from("comments").select("id", { count: "exact", head: true }),
-        supabase.from("posts").select("id, title, category, status, published_at, created_at").order("created_at", { ascending: false }),
+        supabase.from("posts").select("id, title, slug, category, status, published_at, created_at").order("created_at", { ascending: false }),
+        supabase.from("post_views").select("id", { count: "exact", head: true }),
       ]);
 
       const posts = postsRes.data || [];
@@ -77,10 +89,43 @@ export default function Analytics() {
         publishedPosts,
         draftPosts,
         scheduledPosts,
+        totalViews: viewsRes.count ?? 0,
       });
 
       // Recent posts
       setRecentPosts((allPostsRes.data || []).slice(0, 10));
+
+      // Fetch popular posts with view counts
+      const { data: viewData } = await supabase
+        .from("post_views")
+        .select("post_id")
+        .order("viewed_at", { ascending: false });
+
+      // Count views per post
+      const viewCounts = new Map<string, number>();
+      (viewData || []).forEach(v => {
+        viewCounts.set(v.post_id, (viewCounts.get(v.post_id) || 0) + 1);
+      });
+
+      // Get top 10 posts by views
+      const sortedPosts = Array.from(viewCounts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+
+      const popularPostsData: PopularPost[] = [];
+      for (const [postId, views] of sortedPosts) {
+        const post = (allPostsRes.data || []).find(p => p.id === postId);
+        if (post) {
+          popularPostsData.push({
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            category: post.category,
+            views,
+          });
+        }
+      }
+      setPopularPosts(popularPostsData);
 
       // Category distribution
       const categoryMap = new Map<string, number>();
@@ -127,9 +172,9 @@ export default function Analytics() {
 
   const statCards = [
     { title: "Total Posts", value: stats?.totalPosts ?? 0, icon: Newspaper, color: "text-primary" },
-    { title: "Published", value: stats?.publishedPosts ?? 0, icon: Eye, color: "text-green-500" },
-    { title: "Drafts", value: stats?.draftPosts ?? 0, icon: FileText, color: "text-yellow-500" },
-    { title: "Comments", value: stats?.totalComments ?? 0, icon: MessageSquare, color: "text-blue-500" },
+    { title: "Total Views", value: stats?.totalViews ?? 0, icon: Eye, color: "text-green-500" },
+    { title: "Published", value: stats?.publishedPosts ?? 0, icon: FileText, color: "text-blue-500" },
+    { title: "Comments", value: stats?.totalComments ?? 0, icon: MessageSquare, color: "text-yellow-500" },
   ];
 
   if (loading) {
@@ -324,6 +369,50 @@ export default function Analytics() {
                         <tr>
                           <td colSpan={4} className="py-8 text-center text-muted-foreground">
                             No posts found
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Popular Posts Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Flame className="h-5 w-5 text-orange-500" />
+                  Popular Posts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-2 font-medium text-muted-foreground">Title</th>
+                        <th className="text-left py-3 px-2 font-medium text-muted-foreground">Category</th>
+                        <th className="text-right py-3 px-2 font-medium text-muted-foreground">Views</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {popularPosts.map((post, index) => (
+                        <tr key={post.id} className="border-b border-border/50 hover:bg-muted/50">
+                          <td className="py-3 px-2 font-medium truncate max-w-[200px]">
+                            <span className="inline-flex items-center gap-2">
+                              {index < 3 && <span className="text-orange-500 font-bold">#{index + 1}</span>}
+                              {post.title}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-muted-foreground">{post.category || "—"}</td>
+                          <td className="py-3 px-2 text-right font-semibold">{post.views.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                      {popularPosts.length === 0 && (
+                        <tr>
+                          <td colSpan={3} className="py-8 text-center text-muted-foreground">
+                            No view data yet. Views will appear as visitors read your posts.
                           </td>
                         </tr>
                       )}
