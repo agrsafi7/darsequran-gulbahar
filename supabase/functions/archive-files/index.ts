@@ -61,11 +61,15 @@ Deno.serve(async (req) => {
         track: file.track,
         downloadUrl: `https://archive.org/download/${itemId}/${encodeURIComponent(file.name)}`,
       }))
-      .sort((a: { track?: string }, b: { track?: string }) => {
-        // Sort by track number if available
+      .sort((a: { track?: string; name: string }, b: { track?: string; name: string }) => {
+        // Sort by track number if available, otherwise by filename (ascending)
         const trackA = parseInt(a.track || '0', 10);
         const trackB = parseInt(b.track || '0', 10);
-        return trackA - trackB;
+        if (trackA !== 0 || trackB !== 0) {
+          return trackA - trackB;
+        }
+        // Fallback: sort by filename alphabetically (ascending order)
+        return a.name.localeCompare(b.name, undefined, { numeric: true });
       });
 
     // Find bulk download options (torrent and ZIP)
