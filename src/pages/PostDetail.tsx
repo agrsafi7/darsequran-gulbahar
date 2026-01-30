@@ -213,11 +213,12 @@ export default function PostDetail() {
 
             {/* Featured Image */}
             {post.featured_image && (
-              <div className="mb-8 rounded-lg overflow-hidden">
+               <div className="mb-8 rounded-lg overflow-hidden">
                 <img
                   src={post.featured_image}
                   alt={post.title}
-                  className="w-full h-auto object-cover"
+                   loading="lazy"
+                   className="w-full h-auto max-h-[520px] md:max-h-[420px] object-cover"
                 />
               </div>
             )}

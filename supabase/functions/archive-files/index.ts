@@ -62,14 +62,16 @@ Deno.serve(async (req) => {
         downloadUrl: `https://archive.org/download/${itemId}/${encodeURIComponent(file.name)}`,
       }))
       .sort((a: { track?: string; name: string }, b: { track?: string; name: string }) => {
-        // Sort by track number if available, otherwise by filename (ascending)
-        const trackA = parseInt(a.track || '0', 10);
-        const trackB = parseInt(b.track || '0', 10);
-        if (trackA !== 0 || trackB !== 0) {
-          return trackA - trackB;
-        }
-        // Fallback: sort by filename alphabetically (ascending order)
-        return a.name.localeCompare(b.name, undefined, { numeric: true });
+        // Primary: track number (ascending)
+        // Secondary (tie-breaker): filename (ascending, numeric-aware)
+        // This makes ordering deterministic and keeps it aligned with the player order.
+        const trackA = Number.parseInt((a.track ?? '0').toString(), 10) || 0;
+        const trackB = Number.parseInt((b.track ?? '0').toString(), 10) || 0;
+
+        if (trackA !== trackB) return trackA - trackB;
+
+        // Tie-breaker: name so files with same/missing track still sort predictably
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
       });
 
     // Find bulk download options (torrent and ZIP)
