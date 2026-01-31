@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdPlaceholder } from "@/components/shared/AdPlaceholder";
+import { LiveStreamButtons } from "@/components/home/LiveStreamButtons";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -73,13 +74,16 @@ export function AboutPreview() {
               </p>
             )}
 
-            <div className="pt-4">
+            <div className="pt-4 space-y-4">
               <Button asChild className="group">
                 <Link to="/about">
                   Read More About Us
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
+              
+              {/* Live Stream Buttons */}
+              <LiveStreamButtons />
             </div>
           </div>
 

@@ -30,6 +30,7 @@ import AdminSettings from "./pages/admin/Settings";
 import AdminHeroSlides from "./pages/admin/HeroSlides";
 import AdminAdPlacements from "./pages/admin/AdPlacements";
 import AdminAnalytics from "./pages/admin/Analytics";
+import AdminLiveStreams from "./pages/admin/LiveStreams";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/admin/comments" element={<AdminComments />} />
             <Route path="/admin/ads" element={<AdminAdPlacements />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/live-streams" element={<AdminLiveStreams />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
             
             
