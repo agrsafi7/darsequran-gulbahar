@@ -10,6 +10,7 @@ import {
   Layers,
   Tags,
   Megaphone,
+  Radio,
   BarChart3,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +40,7 @@ const menuItems = [
   { title: "Navigation", url: "/admin/navigation", icon: Menu },
   { title: "Comments", url: "/admin/comments", icon: MessageSquare },
   { title: "Ad Placements", url: "/admin/ads", icon: Megaphone },
+  { title: "Live Streams", url: "/admin/live-streams", icon: Radio },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
