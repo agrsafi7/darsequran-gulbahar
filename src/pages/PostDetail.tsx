@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { PlaylistEmbed } from "@/components/shared/PlaylistEmbed";
 import { ArchiveContent } from "@/components/shared/ArchiveContent";
 import { ContentSidebar } from "@/components/shared/ContentSidebar";
-import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, Loader2, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackContentView } from "@/lib/analytics";
 
@@ -50,6 +50,7 @@ export default function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [backRoute, setBackRoute] = useState<{ url: string; label: string }>({ url: "/posts", label: "Posts" });
+  const [viewCount, setViewCount] = useState<number | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -80,12 +81,27 @@ export default function PostDetail() {
     // Track view in database for internal analytics
     trackPostView(data.id);
     
+    // Fetch view count
+    fetchViewCount(data.id);
+    
     // Determine back route based on post category
     if (data.category) {
       await determineBackRoute(data.category);
     }
     
     setLoading(false);
+  };
+
+  const fetchViewCount = async (postId: string) => {
+    const { data } = await supabase
+      .from("post_view_counts")
+      .select("total_views")
+      .eq("post_id", postId)
+      .maybeSingle();
+    
+    if (data?.total_views) {
+      setViewCount(data.total_views);
+    }
   };
 
   const determineBackRoute = async (category: string) => {
@@ -225,7 +241,7 @@ export default function PostDetail() {
 
             {/* Header */}
             <header className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-4 flex-wrap">
                 {post.category && (
                   <Badge variant="secondary">{post.category}</Badge>
                 )}
@@ -233,6 +249,12 @@ export default function PostDetail() {
                   <span className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     {publishedDate}
+                  </span>
+                )}
+                {viewCount !== null && (
+                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Eye className="h-4 w-4" />
+                    {viewCount.toLocaleString()} {viewCount === 1 ? 'view' : 'views'}
                   </span>
                 )}
               </div>
