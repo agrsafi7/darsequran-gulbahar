@@ -147,16 +147,16 @@ export function ArchiveDownloadList({ itemId }: ArchiveDownloadListProps) {
                 )}
               </div>
 
-              <Button variant="ghost" size="sm" asChild className="ml-2 shrink-0">
-                <a
-                  href={file.downloadUrl}
-                  download={displayLabel}
-                  aria-label={`Download ${displayLabel}`}
-                  onClick={() => trackDownload(displayLabel, 'audio', itemId)}
-                >
-                  <Download className="h-4 w-4" />
-                </a>
-              </Button>
+              <a
+                href={file.downloadUrl}
+                download={displayLabel}
+                aria-label={`Download ${displayLabel}`}
+                onClick={() => trackDownload(displayLabel, 'audio', itemId)}
+                className="ml-2 shrink-0 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-sm font-medium hover:shadow-md hover:scale-105"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Download</span>
+              </a>
             </div>
           );
         })}
