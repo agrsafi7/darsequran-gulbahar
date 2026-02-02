@@ -113,13 +113,13 @@ export function ArchiveDownloadList({ itemId }: ArchiveDownloadListProps) {
       </h3>
       
       <div className="border rounded-lg divide-y">
-        {files.map((file) => {
+        {files.map((file, index) => {
           const displayLabel = formatArchiveFileLabel(file.name) || file.title;
 
           return (
             <div
               key={file.name}
-              className="flex items-center justify-between px-4 py-5 hover:bg-muted/50 transition-colors"
+              className={`flex items-center justify-between px-4 py-5 transition-colors ${index % 2 === 0 ? 'bg-muted/30' : 'bg-background'} hover:bg-muted/50`}
             >
               <div className="flex-1 min-w-0">
                 <span
