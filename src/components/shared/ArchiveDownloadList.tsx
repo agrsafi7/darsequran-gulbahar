@@ -122,17 +122,12 @@ export function ArchiveDownloadList({ itemId }: ArchiveDownloadListProps) {
               className="flex items-center justify-between px-4 py-5 hover:bg-muted/50 transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <a
-                  href={file.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
-                  className="block font-semibold text-primary text-base md:text-lg leading-snug hover:underline truncate"
+                <span
+                  className="block font-medium text-foreground text-base md:text-lg leading-snug truncate"
                   title={displayLabel}
-                  onClick={() => trackDownload(displayLabel, 'audio', itemId)}
                 >
                   {displayLabel}
-                </a>
+                </span>
 
                 {(file.length || file.size) && (
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
