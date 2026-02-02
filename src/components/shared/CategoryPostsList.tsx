@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText } from "lucide-react";
+import { FileText, Eye } from "lucide-react";
 
 interface Post {
   id: string;
@@ -12,6 +12,7 @@ interface Post {
   featured_image: string | null;
   published_at: string | null;
   category: string | null;
+  view_count?: number;
 }
 
 interface CategoryPostsListProps {
@@ -58,8 +59,22 @@ export function CategoryPostsList({
           const dateB = b.published_at ? new Date(b.published_at).getTime() : 0;
           return dateB - dateA;
         });
+
+        // Fetch view counts for all posts
+        const postIds = sortedPosts.map(p => p.id);
+        const { data: viewCounts } = await supabase
+          .from("post_view_counts")
+          .select("post_id, total_views")
+          .in("post_id", postIds);
+
+        // Map view counts to posts
+        const viewCountMap = new Map(viewCounts?.map(v => [v.post_id, v.total_views]) || []);
+        const postsWithViews = sortedPosts.map(post => ({
+          ...post,
+          view_count: viewCountMap.get(post.id) || 0,
+        }));
         
-        setPosts(sortedPosts);
+        setPosts(postsWithViews);
       }
       setLoading(false);
     };
@@ -118,13 +133,21 @@ export function CategoryPostsList({
                 </p>
               )}
               {post.published_at && (
-                <span className="text-xs text-muted-foreground mt-2 block">
-                  {new Date(post.published_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(post.published_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  {post.view_count !== undefined && post.view_count > 0 && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Eye className="h-3 w-3" />
+                      {post.view_count.toLocaleString()}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>

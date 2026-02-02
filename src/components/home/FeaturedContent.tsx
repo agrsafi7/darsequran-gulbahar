@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Mic2, FileText, ArrowRight } from "lucide-react";
+import { BookOpen, Mic2, FileText, ArrowRight, Eye } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -66,6 +66,7 @@ export function FeaturedContent() {
         excerpt: string | null;
         featured_image: string | null;
         published_at: string | null;
+        view_count?: number;
       }> = [];
 
       // Fetch one post from each category
@@ -80,7 +81,17 @@ export function FeaturedContent() {
           .maybeSingle();
 
         if (data) {
-          posts.push(data);
+          // Fetch view count for this post
+          const { data: viewData } = await supabase
+            .from("post_view_counts")
+            .select("total_views")
+            .eq("post_id", data.id)
+            .maybeSingle();
+
+          posts.push({
+            ...data,
+            view_count: viewData?.total_views || 0,
+          });
         }
       }
 
@@ -185,7 +196,7 @@ export function FeaturedContent() {
                         )}
                       </div>
                       <CardHeader className="pb-2">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                           {post.category && (
                             <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
                               {post.category}
@@ -198,6 +209,12 @@ export function FeaturedContent() {
                                 day: 'numeric', 
                                 year: 'numeric' 
                               })}
+                            </span>
+                          )}
+                          {post.view_count !== undefined && post.view_count > 0 && (
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Eye className="h-3 w-3" />
+                              {post.view_count.toLocaleString()}
                             </span>
                           )}
                         </div>
