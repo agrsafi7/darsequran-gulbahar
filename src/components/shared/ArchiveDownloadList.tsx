@@ -3,6 +3,7 @@ import { Download, Loader2, Clock, HardDrive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { trackDownload } from "@/lib/analytics";
+import { formatArchiveFileLabel } from "@/lib/archiveFileName";
 
 interface ArchiveFile {
   name: string;
@@ -112,54 +113,60 @@ export function ArchiveDownloadList({ itemId }: ArchiveDownloadListProps) {
       </h3>
       
       <div className="border rounded-lg divide-y">
-        {files.map((file, index) => (
-          <div
-            key={file.name}
-            className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
-          >
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                {index + 1}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate" title={file.title}>
-                  {file.title}
-                </p>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                  {file.length && (
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {formatDuration(file.length)}
-                    </span>
-                  )}
-                  {file.size && (
-                    <span className="flex items-center gap-1">
-                      <HardDrive className="h-3 w-3" />
-                      {formatFileSize(file.size)}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="ml-2 shrink-0"
+        {files.map((file) => {
+          const displayLabel = formatArchiveFileLabel(file.name) || file.title;
+
+          return (
+            <div
+              key={file.name}
+              className="flex items-center justify-between px-4 py-5 hover:bg-muted/50 transition-colors"
             >
-              <a
-                href={file.downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
-                onClick={() => trackDownload(file.title, 'audio', itemId)}
-              >
-                <Download className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-        ))}
+              <div className="flex-1 min-w-0">
+                <a
+                  href={file.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  className="block font-semibold text-primary text-base md:text-lg leading-snug hover:underline truncate"
+                  title={displayLabel}
+                  onClick={() => trackDownload(displayLabel, 'audio', itemId)}
+                >
+                  {displayLabel}
+                </a>
+
+                {(file.length || file.size) && (
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+                    {file.length && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {formatDuration(file.length)}
+                      </span>
+                    )}
+                    {file.size && (
+                      <span className="flex items-center gap-1">
+                        <HardDrive className="h-3 w-3" />
+                        {formatFileSize(file.size)}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <Button variant="ghost" size="sm" asChild className="ml-2 shrink-0">
+                <a
+                  href={file.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  aria-label={`Download ${displayLabel}`}
+                  onClick={() => trackDownload(displayLabel, 'audio', itemId)}
+                >
+                  <Download className="h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          );
+        })}
       </div>
       
       <p className="text-xs text-muted-foreground text-center pt-2">
