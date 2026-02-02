@@ -150,9 +150,7 @@ export function ArchiveDownloadList({ itemId }: ArchiveDownloadListProps) {
               <Button variant="ghost" size="sm" asChild className="ml-2 shrink-0">
                 <a
                   href={file.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download
+                  download={displayLabel}
                   aria-label={`Download ${displayLabel}`}
                   onClick={() => trackDownload(displayLabel, 'audio', itemId)}
                 >
