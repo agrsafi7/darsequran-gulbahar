@@ -148,17 +148,12 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                   className="flex items-center justify-between px-4 py-5 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <a
-                      href={file.downloadUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
-                      className="block font-semibold text-primary text-base md:text-lg leading-snug hover:underline truncate"
+                    <span
+                      className="block font-medium text-foreground text-base md:text-lg leading-snug truncate"
                       title={displayLabel}
-                      onClick={() => trackDownload(displayLabel, 'audio', itemId)}
                     >
                       {displayLabel}
-                    </a>
+                    </span>
 
                     {(file.length || file.size) && (
                       <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
@@ -178,18 +173,16 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                     )}
                   </div>
 
-                  <Button variant="ghost" size="sm" asChild className="ml-2 shrink-0">
-                    <a
-                      href={file.downloadUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
-                      aria-label={`Download ${displayLabel}`}
-                      onClick={() => trackDownload(displayLabel, 'audio', itemId)}
-                    >
-                      <Download className="h-4 w-4" />
-                    </a>
-                  </Button>
+                  <a
+                    href={file.downloadUrl}
+                    download={displayLabel}
+                    aria-label={`Download ${displayLabel}`}
+                    onClick={() => trackDownload(displayLabel, 'audio', itemId)}
+                    className="ml-2 shrink-0 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-sm font-medium hover:shadow-md hover:scale-105"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Download</span>
+                  </a>
                 </div>
               );
             })}
