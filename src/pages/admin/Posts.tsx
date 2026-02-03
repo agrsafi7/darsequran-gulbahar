@@ -128,9 +128,12 @@ export default function AdminPosts() {
       });
     } catch (error: any) {
       console.error("Error generating image:", error);
+      const isPaymentError = error.message?.includes("Payment required") || error.message?.includes("credits");
       toast({
         title: "Generation Failed",
-        description: error.message || "Could not generate image. Please try again.",
+        description: isPaymentError 
+          ? "AI credits unavailable. Please enter an image URL manually instead."
+          : error.message || "Could not generate image. You can enter an image URL manually.",
         variant: "destructive",
       });
     } finally {
