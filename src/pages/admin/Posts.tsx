@@ -476,9 +476,14 @@ export default function AdminPosts() {
                       />
                     </div>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Enter URL or click Generate to create an AI image based on the title.
-                  </p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span>Find images:</span>
+                    <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Unsplash</a>
+                    <a href="https://pexels.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Pexels</a>
+                    <a href="https://pixabay.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Pixabay</a>
+                    <span className="text-muted-foreground/60">|</span>
+                    <span>Or click Generate for AI image</span>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="playlist_embed_url">Playlist Embed URL (Optional)</Label>
