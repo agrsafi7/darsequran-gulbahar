@@ -240,8 +240,38 @@ export default function HeroSlides() {
     }
   };
 
+  const activeCount = slides.filter(s => s.is_active).length;
+  const inactiveCount = slides.length - activeCount;
+
+  const slideStatCards = [
+    { title: "Total Slides", value: slides.length, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]", icon: ImageIcon },
+    { title: "Active", value: activeCount, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]", icon: ImageIcon },
+    { title: "Inactive", value: inactiveCount, bg: "bg-[hsl(0_70%_58%)]", iconBg: "bg-[hsl(0_70%_50%)]", icon: ImageIcon },
+  ];
+
   return (
     <AdminLayout title="Hero Slides">
+      <div className="space-y-6">
+        {!loading && (
+          <div className="grid gap-4 md:grid-cols-3">
+            {slideStatCards.map((stat) => (
+              <div
+                key={stat.title}
+                className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                    <p className="mt-2 text-3xl font-bold font-sans">{stat.value}</p>
+                  </div>
+                  <div className={`${stat.iconBg} rounded-full p-3`}>
+                    <stat.icon className="h-6 w-6 text-white/90" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -495,6 +525,7 @@ export default function HeroSlides() {
           )}
         </CardContent>
       </Card>
+      </div>
     </AdminLayout>
   );
 }

@@ -171,10 +171,10 @@ export default function Analytics() {
   };
 
   const statCards = [
-    { title: "Total Posts", value: stats?.totalPosts ?? 0, icon: Newspaper, color: "text-primary" },
-    { title: "Total Views", value: stats?.totalViews ?? 0, icon: Eye, color: "text-green-500" },
-    { title: "Published", value: stats?.publishedPosts ?? 0, icon: FileText, color: "text-blue-500" },
-    { title: "Comments", value: stats?.totalComments ?? 0, icon: MessageSquare, color: "text-yellow-500" },
+    { title: "Total Posts", value: stats?.totalPosts ?? 0, icon: Newspaper, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]" },
+    { title: "Total Views", value: stats?.totalViews ?? 0, icon: Eye, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]" },
+    { title: "Published", value: stats?.publishedPosts ?? 0, icon: FileText, bg: "bg-[hsl(262_60%_55%)]", iconBg: "bg-[hsl(262_60%_48%)]" },
+    { title: "Comments", value: stats?.totalComments ?? 0, icon: MessageSquare, bg: "bg-[hsl(0_70%_58%)]", iconBg: "bg-[hsl(0_70%_50%)]" },
   ];
 
   if (loading) {
@@ -183,14 +183,10 @@ export default function Analytics() {
         <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map(i => (
-              <Card key={i}>
-                <CardHeader className="pb-2">
-                  <Skeleton className="h-4 w-24" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-8 w-16" />
-                </CardContent>
-              </Card>
+              <div key={i} className="rounded-xl bg-muted p-5 animate-pulse">
+                <Skeleton className="h-4 w-24 mb-3" />
+                <Skeleton className="h-8 w-16" />
+              </div>
             ))}
           </div>
           <Skeleton className="h-[400px] w-full" />
@@ -205,17 +201,20 @@ export default function Analytics() {
         {/* Stat Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat) => (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-              </CardContent>
-            </Card>
+            <div
+              key={stat.title}
+              className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                  <p className="mt-2 text-3xl font-bold font-sans">{stat.value.toLocaleString()}</p>
+                </div>
+                <div className={`${stat.iconBg} rounded-full p-3`}>
+                  <stat.icon className="h-6 w-6 text-white/90" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
