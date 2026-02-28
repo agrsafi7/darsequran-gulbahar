@@ -163,8 +163,38 @@ export default function AdminMedia() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const imageCount = media.filter(m => m.mime_type?.startsWith("image/")).length;
+  const otherCount = media.length - imageCount;
+
+  const mediaStatCards = [
+    { title: "Total Files", value: media.length, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]", icon: ImageIcon },
+    { title: "Images", value: imageCount, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]", icon: ImageIcon },
+    { title: "Other Files", value: otherCount, bg: "bg-[hsl(262_60%_55%)]", iconBg: "bg-[hsl(262_60%_48%)]", icon: Upload },
+  ];
+
   return (
     <AdminLayout title="Media Library">
+      <div className="space-y-6">
+        {!loading && (
+          <div className="grid gap-4 md:grid-cols-3">
+            {mediaStatCards.map((stat) => (
+              <div
+                key={stat.title}
+                className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                    <p className="mt-2 text-3xl font-bold font-sans">{stat.value}</p>
+                  </div>
+                  <div className={`${stat.iconBg} rounded-full p-3`}>
+                    <stat.icon className="h-6 w-6 text-white/90" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Manage Media</CardTitle>
@@ -284,6 +314,7 @@ export default function AdminMedia() {
           )}
         </CardContent>
       </Card>
+      </div>
     </AdminLayout>
   );
 }

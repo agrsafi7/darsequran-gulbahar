@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Loader2, CalendarIcon, Sparkles } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, CalendarIcon, Sparkles, Newspaper, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -302,8 +302,40 @@ export default function AdminPosts() {
     });
   };
 
+  const publishedCount = posts.filter(p => p.status === "published").length;
+  const draftCount = posts.filter(p => p.status === "draft").length;
+  const scheduledCount = posts.filter(p => p.status === "scheduled").length;
+
+  const postStatCards = [
+    { title: "Total Posts", value: posts.length, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]", icon: Newspaper },
+    { title: "Published", value: publishedCount, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]", icon: FileText },
+    { title: "Drafts", value: draftCount, bg: "bg-[hsl(42_75%_55%)]", iconBg: "bg-[hsl(42_75%_48%)]", icon: Pencil },
+    { title: "Scheduled", value: scheduledCount, bg: "bg-[hsl(262_60%_55%)]", iconBg: "bg-[hsl(262_60%_48%)]", icon: CalendarIcon },
+  ];
+
   return (
     <AdminLayout title="Posts">
+      <div className="space-y-6">
+        {!loading && (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {postStatCards.map((stat) => (
+              <div
+                key={stat.title}
+                className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                    <p className="mt-2 text-3xl font-bold font-sans">{stat.value}</p>
+                  </div>
+                  <div className={`${stat.iconBg} rounded-full p-3`}>
+                    <stat.icon className="h-6 w-6 text-white/90" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Manage Posts</CardTitle>
@@ -638,6 +670,7 @@ export default function AdminPosts() {
           )}
         </CardContent>
       </Card>
+      </div>
     </AdminLayout>
   );
 }

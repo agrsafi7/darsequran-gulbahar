@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -178,8 +178,38 @@ export default function AdminPages() {
     });
   };
 
+  const publishedPages = pages.filter(p => p.status === "published").length;
+  const draftPages = pages.filter(p => p.status === "draft").length;
+
+  const pageStatCards = [
+    { title: "Total Pages", value: pages.length, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]", icon: FileText },
+    { title: "Published", value: publishedPages, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]", icon: FileText },
+    { title: "Drafts", value: draftPages, bg: "bg-[hsl(42_75%_55%)]", iconBg: "bg-[hsl(42_75%_48%)]", icon: Pencil },
+  ];
+
   return (
     <AdminLayout title="Pages">
+      <div className="space-y-6">
+        {!loading && (
+          <div className="grid gap-4 md:grid-cols-3">
+            {pageStatCards.map((stat) => (
+              <div
+                key={stat.title}
+                className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                    <p className="mt-2 text-3xl font-bold font-sans">{stat.value}</p>
+                  </div>
+                  <div className={`${stat.iconBg} rounded-full p-3`}>
+                    <stat.icon className="h-6 w-6 text-white/90" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Manage Pages</CardTitle>
@@ -343,6 +373,7 @@ export default function AdminPages() {
           )}
         </CardContent>
       </Card>
+      </div>
     </AdminLayout>
   );
 }
