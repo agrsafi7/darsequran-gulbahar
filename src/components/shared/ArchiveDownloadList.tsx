@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import { Download, Loader2, Clock, HardDrive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { trackDownload } from "@/lib/analytics";
 import { formatArchiveFileLabel } from "@/lib/archiveFileName";
-import { forceDownload } from "@/lib/forceDownload";
+import { DownloadButton } from "./DownloadButton";
 
 interface ArchiveFile {
   name: string;
