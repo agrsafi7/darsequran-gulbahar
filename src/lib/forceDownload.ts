@@ -43,7 +43,7 @@ export async function forceDownload(
         }
       }
 
-      blob = new Blob(chunks);
+      blob = new Blob(chunks as BlobPart[]);
     } else {
       blob = await res.blob();
       onProgress?.({ loaded: blob.size, total: blob.size, percent: 100 });
