@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Download, Loader2, RefreshCw } from "lucide-react";
+import { useState, useRef } from "react";
+import { Download, Loader2, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 import { forceDownload, type DownloadProgress } from "@/lib/forceDownload";
 import { trackDownload } from "@/lib/analytics";
@@ -22,6 +22,21 @@ export function DownloadButton({ url, filename, itemId }: DownloadButtonProps) {
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState<DownloadProgress | null>(null);
   const [errored, setErrored] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const reset = () => {
+    setDownloading(false);
+    setProgress(null);
+    setErrored(false);
+    abortRef.current = null;
+  };
+
+  const cancel = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    abortRef.current?.abort();
+    reset();
+  };
 
   const start = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -30,16 +45,23 @@ export function DownloadButton({ url, filename, itemId }: DownloadButtonProps) {
     setErrored(false);
     setProgress({ loaded: 0, total: 0, percent: 0 });
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     const result = await forceDownload(url, filename, {
       onProgress: (p) => setProgress(p),
+      signal: controller.signal,
     });
+
+    // If aborted, reset was already called by cancel()
+    if (controller.signal.aborted) return;
 
     setDownloading(false);
 
     if (result.ok) {
       setProgress(null);
       toast.success("Download complete", { description: filename });
-    } else {
+    } else if (result.error?.name !== "AbortError") {
       setErrored(true);
       setProgress(null);
       toast.error("Download failed", {
@@ -57,37 +79,50 @@ export function DownloadButton({ url, filename, itemId }: DownloadButtonProps) {
 
   return (
     <div className="ml-2 shrink-0 flex flex-col items-end gap-1 min-w-[110px] sm:min-w-[160px]">
-      <button
-        type="button"
-        disabled={downloading}
-        onClick={start}
-        aria-label={`Download ${filename}`}
-        className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full transition-all duration-200 text-sm font-medium hover:shadow-md disabled:cursor-not-allowed ${
-          errored
-            ? "bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-            : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground hover:scale-105 disabled:opacity-80 disabled:hover:scale-100"
-        }`}
-      >
-        {downloading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : errored ? (
-          <RefreshCw className="h-4 w-4" />
-        ) : (
-          <Download className="h-4 w-4" />
+      <div className="flex items-center gap-1.5 w-full">
+        <button
+          type="button"
+          disabled={downloading}
+          onClick={start}
+          aria-label={`Download ${filename}`}
+          className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full transition-all duration-200 text-sm font-medium hover:shadow-md disabled:cursor-not-allowed ${
+            errored
+              ? "bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground hover:scale-105 disabled:opacity-80 disabled:hover:scale-100"
+          }`}
+        >
+          {downloading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : errored ? (
+            <RefreshCw className="h-4 w-4" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          <span className="hidden sm:inline">
+            {downloading
+              ? percent !== null
+                ? `${Math.floor(percent)}%`
+                : "Downloading..."
+              : errored
+              ? "Retry"
+              : "Download"}
+          </span>
+          <span className="sm:hidden">
+            {downloading && percent !== null ? `${Math.floor(percent)}%` : ""}
+          </span>
+        </button>
+
+        {downloading && (
+          <button
+            type="button"
+            onClick={cancel}
+            aria-label="Cancel download"
+            className="inline-flex items-center justify-center p-2 rounded-full bg-muted/50 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </button>
         )}
-        <span className="hidden sm:inline">
-          {downloading
-            ? percent !== null
-              ? `${Math.floor(percent)}%`
-              : "Downloading..."
-            : errored
-            ? "Retry"
-            : "Download"}
-        </span>
-        <span className="sm:hidden">
-          {downloading && percent !== null ? `${Math.floor(percent)}%` : ""}
-        </span>
-      </button>
+      </div>
 
       {showBar && (
         <div className="w-full">
