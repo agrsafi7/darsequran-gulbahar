@@ -6,6 +6,7 @@ import { PlaylistEmbed } from "./PlaylistEmbed";
 import { supabase } from "@/integrations/supabase/client";
 import { trackDownload } from "@/lib/analytics";
 import { formatArchiveFileLabel } from "@/lib/archiveFileName";
+import { forceDownload } from "@/lib/forceDownload";
 
 interface ArchiveFile {
   name: string;
