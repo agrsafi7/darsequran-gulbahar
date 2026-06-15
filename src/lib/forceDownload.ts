@@ -30,6 +30,7 @@ export async function forceDownload(
       let loaded = 0;
 
       while (true) {
+        if (signal?.aborted) throw new DOMException("Download cancelled", "AbortError");
         const { done, value } = await reader.read();
         if (done) break;
         if (value) {
@@ -59,6 +60,9 @@ export async function forceDownload(
     setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     return { ok: true };
   } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      return { ok: false, error: err };
+    }
     console.error("Force download failed:", err);
     return { ok: false, error: err instanceof Error ? err : new Error(String(err)) };
   }
