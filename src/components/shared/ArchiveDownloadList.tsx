@@ -44,7 +44,7 @@ export function ArchiveDownloadList({ itemId }: ArchiveDownloadListProps) {
   const [files, setFiles] = useState<ArchiveFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  
 
   useEffect(() => {
     if (itemId) {
