@@ -175,31 +175,11 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    disabled={downloadingId === file.name}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      trackDownload(displayLabel, 'audio', itemId);
-                      setDownloadingId(file.name);
-                      try {
-                        await forceDownload(file.downloadUrl, displayLabel);
-                      } finally {
-                        setDownloadingId(null);
-                      }
-                    }}
-                    aria-label={`Download ${displayLabel}`}
-                    className="ml-2 shrink-0 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-sm font-medium hover:shadow-md hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  >
-                    {downloadingId === file.name ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Download className="h-4 w-4" />
-                    )}
-                    <span className="hidden sm:inline">
-                      {downloadingId === file.name ? 'Downloading...' : 'Download'}
-                    </span>
-                  </button>
+                  <DownloadButton
+                    url={file.downloadUrl}
+                    filename={displayLabel}
+                    itemId={itemId}
+                  />
                 </div>
               );
             })}
