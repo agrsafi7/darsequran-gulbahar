@@ -115,25 +115,36 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
   const torrent = bulkDownloads.find(d => d.type === 'torrent');
   const zip = bulkDownloads.find(d => d.type === 'zip');
 
+  const activeFile = selectedFile ?? files[0] ?? null;
+  const activeLabel = activeFile
+    ? formatArchiveFileLabel(activeFile.name) || activeFile.title
+    : "";
+
   return (
     <div className="space-y-8">
-      {/* Section 1: Playlist Embed */}
-      <section>
-        <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-          🎵 Listen Online
-        </h3>
-        <PlaylistEmbed url={playlistUrl} />
-      </section>
+      {/* Section 1: Custom Audio Player */}
+      {activeFile && (
+        <section>
+          <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
+            🎵 Listen Online
+          </h3>
+          <AudioPlayer
+            key={activeFile.name}
+            src={activeFile.downloadUrl}
+            title={activeLabel}
+          />
+        </section>
+      )}
 
       <Separator className="my-8" />
 
-      {/* Section 2: Download List */}
+      {/* Section 2: Download List (also selects file for player) */}
       <section>
         <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
           <Download className="h-5 w-5 text-primary" />
-          Download Individual Files ({files.length})
+          Audio Files ({files.length})
         </h3>
-        
+
         {files.length === 0 ? (
           <div className="p-4 bg-muted rounded-lg text-center text-muted-foreground">
             <p>No downloadable files found.</p>
@@ -142,13 +153,41 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
           <div className="border rounded-lg divide-y">
             {files.map((file, index) => {
               const displayLabel = formatArchiveFileLabel(file.name) || file.title;
+              const isActive = activeFile?.name === file.name;
 
               return (
                 <div
                   key={file.name}
-                  className={`flex items-center justify-between px-4 py-5 transition-colors ${index % 2 === 0 ? 'bg-muted/30' : 'bg-background'} hover:bg-muted/50`}
+                  className={`flex items-center justify-between gap-2 px-4 py-5 transition-colors ${
+                    isActive
+                      ? "bg-primary/10"
+                      : index % 2 === 0
+                      ? "bg-muted/30"
+                      : "bg-background"
+                  } hover:bg-muted/50`}
                 >
-                  <div className="flex-1 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFile(file)}
+                    aria-label={`Play ${displayLabel}`}
+                    className={`shrink-0 flex items-center justify-center h-9 w-9 rounded-full transition-colors ${
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+                    }`}
+                  >
+                    {isActive ? (
+                      <Pause className="h-4 w-4" fill="currentColor" />
+                    ) : (
+                      <Play className="h-4 w-4 ml-0.5" fill="currentColor" />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFile(file)}
+                    className="flex-1 min-w-0 text-left"
+                  >
                     <span
                       className="block font-medium text-foreground text-base md:text-lg leading-snug truncate"
                       title={displayLabel}
@@ -172,7 +211,7 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                         )}
                       </div>
                     )}
-                  </div>
+                  </button>
 
                   <DownloadButton
                     url={file.downloadUrl}
@@ -185,6 +224,7 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
           </div>
         )}
       </section>
+
 
       <Separator className="my-8" />
 
