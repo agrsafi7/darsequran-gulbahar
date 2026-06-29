@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, RotateCcw, RotateCw } from "lucide-react";
+import { Play, Pause, RotateCcw, RotateCw, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface AudioPlayerProps {
   src: string;
   title: string;
-  label?: string;
 }
 
 const SPEEDS = [1, 1.5, 2] as const;
@@ -18,19 +18,20 @@ function formatTime(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayerProps) {
+export function AudioPlayer({ src, title }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [speedIdx, setSpeedIdx] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Reset & autoplay when src changes
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
     setCurrent(0);
     setDuration(0);
+    setLoading(true);
     audio.playbackRate = SPEEDS[speedIdx];
     const playPromise = audio.play();
     if (playPromise) playPromise.then(() => setPlaying(true)).catch(() => setPlaying(false));
@@ -43,7 +44,7 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
 
   const togglePlay = () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || loading) return;
     if (audio.paused) {
       audio.play().then(() => setPlaying(true)).catch(() => {});
     } else {
@@ -54,7 +55,7 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
 
   const skip = (delta: number) => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || loading) return;
     audio.currentTime = Math.max(0, Math.min((audio.duration || 0), audio.currentTime + delta));
   };
 
@@ -72,28 +73,24 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
 
   return (
     <div
-      className="rounded-2xl p-5 sm:p-6 shadow-lg"
-      style={{
-        background: "linear-gradient(135deg, hsl(178 55% 18%), hsl(178 60% 14%))",
-        color: "hsl(40 30% 95%)",
-      }}
+      className="rounded-2xl p-5 sm:p-6 shadow-lg bg-card border border-border text-card-foreground"
     >
       <audio
         ref={audioRef}
         src={src}
-        preload="metadata"
+        preload="auto"
         onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
-        onEnded={() => setPlaying(false)}
+        onCanPlay={() => setLoading(false)}
+        onWaiting={() => setLoading(true)}
+        onPlaying={() => { setLoading(false); setPlaying(true); }}
+        onEnded={() => {
+          setPlaying(false);
+          toast.success("Playback finished", { description: title });
+        }}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />
-
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <span className="text-[11px] sm:text-xs tracking-[0.2em] font-semibold opacity-80">
-          {label}
-        </span>
-      </div>
 
       <h4
         className="text-center font-semibold text-base sm:text-lg leading-snug mb-5 line-clamp-2 px-2"
@@ -107,8 +104,9 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
         <button
           type="button"
           onClick={() => skip(-10)}
+          disabled={loading}
           aria-label="Rewind 10 seconds"
-          className="relative opacity-90 hover:opacity-100 transition"
+          className="relative opacity-90 hover:opacity-100 transition disabled:opacity-40"
         >
           <RotateCcw className="h-7 w-7" strokeWidth={2} />
           <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold mt-0.5">
@@ -119,14 +117,13 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
         <button
           type="button"
           onClick={togglePlay}
+          disabled={loading}
           aria-label={playing ? "Pause" : "Play"}
-          className="flex items-center justify-center rounded-full h-16 w-16 sm:h-[72px] sm:w-[72px] transition-transform hover:scale-105"
-          style={{
-            background: "hsl(178 55% 18%)",
-            boxShadow: "0 0 0 3px hsl(45 70% 55%)",
-          }}
+          className="flex items-center justify-center rounded-full h-16 w-16 sm:h-[72px] sm:w-[72px] transition-transform hover:scale-105 bg-primary text-primary-foreground ring-2 ring-primary/40 disabled:opacity-70"
         >
-          {playing ? (
+          {loading ? (
+            <Loader2 className="h-7 w-7 animate-spin" />
+          ) : playing ? (
             <Pause className="h-7 w-7" fill="currentColor" />
           ) : (
             <Play className="h-7 w-7 ml-0.5" fill="currentColor" />
@@ -135,13 +132,14 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
 
         <button
           type="button"
-          onClick={() => skip(30)}
-          aria-label="Forward 30 seconds"
-          className="relative opacity-90 hover:opacity-100 transition"
+          onClick={() => skip(10)}
+          disabled={loading}
+          aria-label="Forward 10 seconds"
+          className="relative opacity-90 hover:opacity-100 transition disabled:opacity-40"
         >
           <RotateCw className="h-7 w-7" strokeWidth={2} />
           <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold mt-0.5">
-            30
+            10
           </span>
         </button>
 
@@ -149,8 +147,7 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
           type="button"
           onClick={cycleSpeed}
           aria-label="Playback speed"
-          className="text-sm font-semibold px-2.5 py-1 rounded-md border border-current/40 opacity-90 hover:opacity-100 transition min-w-[44px]"
-          style={{ borderColor: "hsl(40 30% 95% / 0.4)" }}
+          className="text-sm font-semibold px-2.5 py-1 rounded-md border border-border opacity-90 hover:opacity-100 transition min-w-[44px]"
         >
           {SPEEDS[speedIdx]}x
         </button>
@@ -160,10 +157,10 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
         <span className="text-xs tabular-nums opacity-90 w-10 text-left">
           {formatTime(current)}
         </span>
-        <div className="relative flex-1 h-1.5 rounded-full bg-white/15">
+        <div className="relative flex-1 h-1.5 rounded-full bg-muted">
           <div
-            className="absolute inset-y-0 left-0 rounded-full"
-            style={{ width: `${progressPct}%`, background: "hsl(45 70% 55%)" }}
+            className="absolute inset-y-0 left-0 rounded-full bg-primary"
+            style={{ width: `${progressPct}%` }}
           />
           <input
             type="range"
@@ -172,21 +169,25 @@ export function AudioPlayer({ src, title, label = "DORA E TAFSIR" }: AudioPlayer
             step={0.1}
             value={current}
             onChange={onSeek}
+            disabled={loading}
             aria-label="Seek"
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
           />
           <div
-            className="absolute -top-1 h-3.5 w-3.5 rounded-full shadow"
-            style={{
-              left: `calc(${progressPct}% - 7px)`,
-              background: "hsl(45 70% 55%)",
-            }}
+            className="absolute -top-1 h-3.5 w-3.5 rounded-full shadow bg-primary"
+            style={{ left: `calc(${progressPct}% - 7px)` }}
           />
         </div>
         <span className="text-xs tabular-nums opacity-90 w-12 text-right">
           {formatTime(duration)}
         </span>
       </div>
+
+      {loading && (
+        <p className="text-xs text-center text-muted-foreground mt-3 flex items-center justify-center gap-2">
+          <Loader2 className="h-3 w-3 animate-spin" /> Buffering…
+        </p>
+      )}
     </div>
   );
 }
