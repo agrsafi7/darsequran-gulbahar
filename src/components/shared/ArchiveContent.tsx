@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Download, Loader2, Clock, HardDrive, FileArchive, Share2 } from "lucide-react";
+import { Download, Loader2, Clock, HardDrive, FileArchive, Share2, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { PlaylistEmbed } from "./PlaylistEmbed";
+import { AudioPlayer } from "./AudioPlayer";
 import { supabase } from "@/integrations/supabase/client";
 import { trackDownload } from "@/lib/analytics";
 import { formatArchiveFileLabel } from "@/lib/archiveFileName";
