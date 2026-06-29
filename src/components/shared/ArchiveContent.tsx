@@ -56,9 +56,8 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
   const [bulkDownloads, setBulkDownloads] = useState<BulkDownload[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const [selectedFile, setSelectedFile] = useState<ArchiveFile | null>(null);
 
-  const playlistUrl = `https://archive.org/embed/${itemId}&playlist=1`;
 
   useEffect(() => {
     if (itemId) {
