@@ -25,6 +25,9 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0);
   const [speedIdx, setSpeedIdx] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [seeking, setSeeking] = useState(false);
+  const [seekValue, setSeekValue] = useState(0);
+  const lastTimeUpdate = useRef(0);
 
   useEffect(() => {
     const audio = audioRef.current;
