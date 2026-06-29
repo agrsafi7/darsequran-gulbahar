@@ -88,7 +88,12 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
         ref={audioRef}
         src={src}
         preload="auto"
-        onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
+        onTimeUpdate={(e) => {
+          const now = performance.now();
+          if (now - lastTimeUpdate.current < 200) return;
+          lastTimeUpdate.current = now;
+          if (!seeking) setCurrent(e.currentTarget.currentTime);
+        }}
         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
         onCanPlay={() => setLoading(false)}
         onWaiting={() => setLoading(true)}
@@ -100,6 +105,13 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />
+
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+        <span className="text-[11px] tracking-[0.2em] font-semibold uppercase opacity-70">
+          Now Playing
+        </span>
+      </div>
 
       <h4
         className="text-center font-semibold text-base sm:text-lg leading-snug mb-5 line-clamp-2 px-2"
