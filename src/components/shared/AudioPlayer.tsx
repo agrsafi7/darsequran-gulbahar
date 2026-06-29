@@ -176,27 +176,30 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
 
       <div className="flex items-center gap-3">
         <span className="text-xs tabular-nums opacity-90 w-10 text-left">
-          {formatTime(current)}
+          {formatTime(displayTime)}
         </span>
         <div className="relative flex-1 h-1.5 rounded-full bg-muted">
           <div
             className="absolute inset-y-0 left-0 rounded-full bg-primary"
-            style={{ width: `${progressPct}%` }}
+            style={{ width: `${progressPct}%`, transition: seeking ? "none" : "width 200ms linear" }}
           />
           <input
             type="range"
             min={0}
             max={duration || 0}
             step={0.1}
-            value={current}
-            onChange={onSeek}
+            value={displayTime}
+            onChange={onSeekChange}
+            onMouseUp={commitSeek}
+            onTouchEnd={commitSeek}
+            onKeyUp={commitSeek}
             disabled={loading}
             aria-label="Seek"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
           />
           <div
             className="absolute -top-1 h-3.5 w-3.5 rounded-full shadow bg-primary"
-            style={{ left: `calc(${progressPct}% - 7px)` }}
+            style={{ left: `calc(${progressPct}% - 7px)`, transition: seeking ? "none" : "left 200ms linear" }}
           />
         </div>
         <span className="text-xs tabular-nums opacity-90 w-12 text-right">
