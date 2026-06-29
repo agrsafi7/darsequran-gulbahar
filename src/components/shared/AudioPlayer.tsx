@@ -62,17 +62,23 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
     audio.currentTime = Math.max(0, Math.min((audio.duration || 0), audio.currentTime + delta));
   };
 
-  const onSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSeekValue(parseFloat(e.target.value));
+    setSeeking(true);
+  };
+
+  const commitSeek = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    const val = parseFloat(e.target.value);
-    audio.currentTime = val;
-    setCurrent(val);
+    audio.currentTime = seekValue;
+    setCurrent(seekValue);
+    setSeeking(false);
   };
 
   const cycleSpeed = () => setSpeedIdx((i) => (i + 1) % SPEEDS.length);
 
-  const progressPct = duration > 0 ? (current / duration) * 100 : 0;
+  const displayTime = seeking ? seekValue : current;
+  const progressPct = duration > 0 ? (displayTime / duration) * 100 : 0;
 
   return (
     <div
