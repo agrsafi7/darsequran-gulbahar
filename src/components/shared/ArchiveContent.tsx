@@ -193,6 +193,12 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                       title={displayLabel}
                     >
                       {displayLabel}
+                      {isActive && (
+                        <span className="ml-2 inline-flex items-center gap-1 align-middle text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/15 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                          Now Playing
+                        </span>
+                      )}
                     </span>
 
                     {(file.length || file.size) && (

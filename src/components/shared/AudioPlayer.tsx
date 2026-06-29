@@ -25,6 +25,9 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
   const [duration, setDuration] = useState(0);
   const [speedIdx, setSpeedIdx] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [seeking, setSeeking] = useState(false);
+  const [seekValue, setSeekValue] = useState(0);
+  const lastTimeUpdate = useRef(0);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -59,17 +62,23 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
     audio.currentTime = Math.max(0, Math.min((audio.duration || 0), audio.currentTime + delta));
   };
 
-  const onSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSeekValue(parseFloat(e.target.value));
+    setSeeking(true);
+  };
+
+  const commitSeek = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    const val = parseFloat(e.target.value);
-    audio.currentTime = val;
-    setCurrent(val);
+    audio.currentTime = seekValue;
+    setCurrent(seekValue);
+    setSeeking(false);
   };
 
   const cycleSpeed = () => setSpeedIdx((i) => (i + 1) % SPEEDS.length);
 
-  const progressPct = duration > 0 ? (current / duration) * 100 : 0;
+  const displayTime = seeking ? seekValue : current;
+  const progressPct = duration > 0 ? (displayTime / duration) * 100 : 0;
 
   return (
     <div
@@ -79,7 +88,12 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
         ref={audioRef}
         src={src}
         preload="auto"
-        onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
+        onTimeUpdate={(e) => {
+          const now = performance.now();
+          if (now - lastTimeUpdate.current < 200) return;
+          lastTimeUpdate.current = now;
+          if (!seeking) setCurrent(e.currentTarget.currentTime);
+        }}
         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
         onCanPlay={() => setLoading(false)}
         onWaiting={() => setLoading(true)}
@@ -91,6 +105,13 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />
+
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+        <span className="text-[11px] tracking-[0.2em] font-semibold uppercase opacity-70">
+          Now Playing
+        </span>
+      </div>
 
       <h4
         className="text-center font-semibold text-base sm:text-lg leading-snug mb-5 line-clamp-2 px-2"
@@ -155,27 +176,30 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
 
       <div className="flex items-center gap-3">
         <span className="text-xs tabular-nums opacity-90 w-10 text-left">
-          {formatTime(current)}
+          {formatTime(displayTime)}
         </span>
         <div className="relative flex-1 h-1.5 rounded-full bg-muted">
           <div
             className="absolute inset-y-0 left-0 rounded-full bg-primary"
-            style={{ width: `${progressPct}%` }}
+            style={{ width: `${progressPct}%`, transition: seeking ? "none" : "width 200ms linear" }}
           />
           <input
             type="range"
             min={0}
             max={duration || 0}
             step={0.1}
-            value={current}
-            onChange={onSeek}
+            value={displayTime}
+            onChange={onSeekChange}
+            onMouseUp={commitSeek}
+            onTouchEnd={commitSeek}
+            onKeyUp={commitSeek}
             disabled={loading}
             aria-label="Seek"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
           />
           <div
             className="absolute -top-1 h-3.5 w-3.5 rounded-full shadow bg-primary"
-            style={{ left: `calc(${progressPct}% - 7px)` }}
+            style={{ left: `calc(${progressPct}% - 7px)`, transition: seeking ? "none" : "left 200ms linear" }}
           />
         </div>
         <span className="text-xs tabular-nums opacity-90 w-12 text-right">
