@@ -7,7 +7,7 @@
    Color palette: Deep Emerald, Warm Gold, Soft Cream
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Fonts are loaded non-render-blocking from index.html */
 
 @layer base {
   :root {

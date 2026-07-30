@@ -120,6 +120,8 @@ export function CategoryPostsList({
               <img
                 src={post.featured_image}
                 alt={post.title}
+                loading="lazy"
+                decoding="async"
                 className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
               />
             )}

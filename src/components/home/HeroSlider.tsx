@@ -113,13 +113,19 @@ export function HeroSlider() {
           )}
         >
           {/* Background Image */}
-          <div 
+          <img
+            src={slide.image_url}
+            alt={slide.heading || "Slide"}
+            loading={index === 0 ? "eager" : "lazy"}
+            decoding={index === 0 ? "sync" : "async"}
+            // @ts-expect-error fetchpriority is valid HTML
+            fetchpriority={index === 0 ? "high" : "low"}
             className={cn(
-              "absolute inset-0 bg-cover bg-center transition-transform duration-[8s]",
+              "absolute inset-0 w-full h-full object-cover object-center transition-transform duration-[8s]",
               index === currentSlide && "slide-animate"
             )}
-            style={{ backgroundImage: `url(${slide.image_url})` }}
           />
+
           
           {/* Overlay */}
           <div className="absolute inset-0 hero-overlay" />

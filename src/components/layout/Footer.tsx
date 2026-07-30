@@ -33,6 +33,8 @@ export function Footer() {
               <img 
                 src={logo} 
                 alt={siteConfig.name} 
+                loading="lazy"
+                decoding="async"
                 className="w-14 h-14 object-contain bg-white rounded-full p-1"
               />
               <div>
