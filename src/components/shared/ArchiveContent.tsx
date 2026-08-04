@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Download, Loader2, Clock, HardDrive, FileArchive, Share2, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -57,6 +57,8 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<ArchiveFile | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 
 
   useEffect(() => {
@@ -120,6 +122,48 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
     ? formatArchiveFileLabel(activeFile.name) || activeFile.title
     : "";
 
+  const selectFile = (file: ArchiveFile) => {
+    if (activeFile?.name === file.name) {
+      setIsPlaying((p) => !p);
+    } else {
+      setSelectedFile(file);
+      setIsPlaying(true);
+    }
+  };
+
+  const focusRow = (index: number) => {
+    const next = Math.max(0, Math.min(files.length - 1, index));
+    rowRefs.current[next]?.focus();
+  };
+
+  const onRowKeyDown = (e: React.KeyboardEvent, index: number, file: ArchiveFile) => {
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        focusRow(index + 1);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        focusRow(index - 1);
+        break;
+      case "Home":
+        e.preventDefault();
+        focusRow(0);
+        break;
+      case "End":
+        e.preventDefault();
+        focusRow(files.length - 1);
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        selectFile(file);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Section 1: Custom Audio Player */}
@@ -132,6 +176,8 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
             key={activeFile.name}
             src={activeFile.downloadUrl}
             title={activeLabel}
+            playing={isPlaying}
+            onPlayingChange={setIsPlaying}
           />
         </section>
       )}
@@ -140,27 +186,45 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
 
       {/* Section 2: Download List (also selects file for player) */}
       <section>
-        <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-          <Download className="h-5 w-5 text-primary" />
-          Audio Files ({files.length})
-        </h3>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Download className="h-5 w-5 text-primary" />
+            Audio Files ({files.length})
+          </h3>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Click a track to play it. Use ↑ / ↓ to move between tracks and Enter or Space to play or pause.
+        </p>
 
         {files.length === 0 ? (
           <div className="p-4 bg-muted rounded-lg text-center text-muted-foreground">
             <p>No downloadable files found.</p>
           </div>
         ) : (
-          <div className="border rounded-lg divide-y max-h-[60vh] md:max-h-[480px] overflow-y-auto overscroll-contain">
+          <div
+            role="listbox"
+            aria-label="Audio files"
+            className="border rounded-lg divide-y max-h-[60vh] md:max-h-[480px] overflow-y-auto overscroll-contain"
+          >
             {files.map((file, index) => {
               const displayLabel = formatArchiveFileLabel(file.name) || file.title;
               const isActive = activeFile?.name === file.name;
+              const isCurrentlyPlaying = isActive && isPlaying;
 
               return (
                 <div
                   key={file.name}
-                  className={`flex items-center justify-between gap-2 px-4 py-5 transition-colors ${
+                  ref={(el) => {
+                    rowRefs.current[index] = el;
+                  }}
+                  role="option"
+                  aria-selected={isActive}
+                  tabIndex={isActive ? 0 : -1}
+                  onKeyDown={(e) => onRowKeyDown(e, index, file)}
+                  onClick={() => selectFile(file)}
+                  className={`flex items-center justify-between gap-3 px-4 py-4 cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset ${
                     isActive
-                      ? "bg-primary/10"
+                      ? "bg-primary/10 border-l-4 border-l-primary pl-3"
                       : index % 2 === 0
                       ? "bg-muted/30"
                       : "bg-background"
@@ -168,35 +232,44 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                 >
                   <button
                     type="button"
-                    onClick={() => setSelectedFile(file)}
-                    aria-label={`Play ${displayLabel}`}
-                    className={`shrink-0 flex items-center justify-center h-9 w-9 rounded-full transition-colors ${
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectFile(file);
+                    }}
+                    aria-label={isCurrentlyPlaying ? `Pause ${displayLabel}` : `Play ${displayLabel}`}
+                    className={`shrink-0 flex items-center justify-center h-10 w-10 rounded-full transition-all ${
                       isActive
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-primary-foreground shadow-md"
                         : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
                     }`}
                   >
-                    {isActive ? (
+                    {isCurrentlyPlaying ? (
                       <Pause className="h-4 w-4" fill="currentColor" />
                     ) : (
                       <Play className="h-4 w-4 ml-0.5" fill="currentColor" />
                     )}
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setSelectedFile(file)}
-                    className="flex-1 min-w-0 text-left"
-                  >
+                  <div className="flex-1 min-w-0">
                     <span
-                      className="block font-medium text-foreground text-base md:text-lg leading-snug truncate"
+                      className={`block font-medium text-base md:text-lg leading-snug truncate ${
+                        isActive ? "text-primary" : "text-foreground"
+                      }`}
                       title={displayLabel}
                     >
+                      <span className="text-muted-foreground tabular-nums text-sm mr-2">
+                        {index + 1}.
+                      </span>
                       {displayLabel}
-                      {isActive && (
+                      {isCurrentlyPlaying && (
                         <span className="ml-2 inline-flex items-center gap-1 align-middle text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/15 px-2 py-0.5 rounded-full">
                           <span className="inline-flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                           Now Playing
+                        </span>
+                      )}
+                      {isActive && !isPlaying && (
+                        <span className="ml-2 inline-flex items-center align-middle text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          Paused
                         </span>
                       )}
                     </span>
@@ -217,19 +290,22 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                         )}
                       </div>
                     )}
-                  </button>
+                  </div>
 
-                  <DownloadButton
-                    url={file.downloadUrl}
-                    filename={displayLabel}
-                    itemId={itemId}
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <DownloadButton
+                      url={file.downloadUrl}
+                      filename={displayLabel}
+                      itemId={itemId}
+                    />
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </section>
+
 
 
       <Separator className="my-8" />
