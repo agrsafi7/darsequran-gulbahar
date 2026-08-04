@@ -57,6 +57,8 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<ArchiveFile | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
 
 
   useEffect(() => {
