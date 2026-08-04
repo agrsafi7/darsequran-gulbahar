@@ -21,9 +21,9 @@ function formatTime(sec: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function AudioPlayer({ src, title }: AudioPlayerProps) {
+export function AudioPlayer({ src, title, playing: desiredPlaying, onPlayingChange }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlayingState] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [speedIdx, setSpeedIdx] = useState(0);
@@ -32,6 +32,13 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
   const [seekValue, setSeekValue] = useState(0);
   const lastTimeUpdate = useRef(0);
 
+  const setPlaying = (value: boolean) => {
+    setPlayingState(value);
+    onPlayingChange?.(value);
+  };
+
+  // New source: reset UI. Progressive streaming — only metadata is fetched
+  // up front, the browser streams the rest of the audio as it plays.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -39,10 +46,21 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
     setDuration(0);
     setLoading(true);
     audio.playbackRate = SPEEDS[speedIdx];
-    const playPromise = audio.play();
-    if (playPromise) playPromise.then(() => setPlaying(true)).catch(() => setPlaying(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
+
+  // Follow the parent's play intent (list play/pause buttons + keyboard).
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || desiredPlaying === undefined) return;
+    if (desiredPlaying && audio.paused) {
+      audio.play().then(() => setPlayingState(true)).catch(() => {});
+    } else if (!desiredPlaying && !audio.paused) {
+      audio.pause();
+      setPlayingState(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [desiredPlaying, src]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.playbackRate = SPEEDS[speedIdx];
@@ -50,7 +68,7 @@ export function AudioPlayer({ src, title }: AudioPlayerProps) {
 
   const togglePlay = () => {
     const audio = audioRef.current;
-    if (!audio || loading) return;
+    if (!audio) return;
     if (audio.paused) {
       audio.play().then(() => setPlaying(true)).catch(() => {});
     } else {
