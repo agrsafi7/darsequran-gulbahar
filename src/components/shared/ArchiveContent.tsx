@@ -150,7 +150,7 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
             <p>No downloadable files found.</p>
           </div>
         ) : (
-          <div className="border rounded-lg divide-y">
+          <div className="border rounded-lg divide-y max-h-[60vh] md:max-h-[480px] overflow-y-auto overscroll-contain">
             {files.map((file, index) => {
               const displayLabel = formatArchiveFileLabel(file.name) || file.title;
               const isActive = activeFile?.name === file.name;
