@@ -217,7 +217,7 @@ export function AudioPlayer({ src, title, playing: desiredPlaying, onPlayingChan
             onMouseUp={commitSeek}
             onTouchEnd={commitSeek}
             onKeyUp={commitSeek}
-            disabled={loading}
+            disabled={!duration}
             aria-label="Seek"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
           />
