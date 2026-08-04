@@ -162,7 +162,7 @@ export function AudioPlayer({ src, title, playing: desiredPlaying, onPlayingChan
         <button
           type="button"
           onClick={togglePlay}
-          disabled={loading}
+          disabled={false}
           aria-label={playing ? "Pause" : "Play"}
           className="flex items-center justify-center rounded-full h-16 w-16 sm:h-[72px] sm:w-[72px] transition-transform hover:scale-105 bg-primary text-primary-foreground ring-2 ring-primary/40 disabled:opacity-70"
         >
