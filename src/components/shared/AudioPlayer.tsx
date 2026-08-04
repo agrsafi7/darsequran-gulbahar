@@ -108,14 +108,17 @@ export function AudioPlayer({ src, title, playing: desiredPlaying, onPlayingChan
       <audio
         ref={audioRef}
         src={src}
-        preload="auto"
+        preload="metadata"
         onTimeUpdate={(e) => {
           const now = performance.now();
           if (now - lastTimeUpdate.current < 200) return;
           lastTimeUpdate.current = now;
           if (!seeking) setCurrent(e.currentTarget.currentTime);
         }}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
+        onLoadedMetadata={(e) => {
+          setDuration(e.currentTarget.duration || 0);
+          setLoading(false);
+        }}
         onCanPlay={() => setLoading(false)}
         onWaiting={() => setLoading(true)}
         onPlaying={() => { setLoading(false); setPlaying(true); }}
