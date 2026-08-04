@@ -5,6 +5,9 @@ import { toast } from "sonner";
 interface AudioPlayerProps {
   src: string;
   title: string;
+  /** Controlled play intent from the parent list (optional). */
+  playing?: boolean;
+  onPlayingChange?: (playing: boolean) => void;
 }
 
 const SPEEDS = [1, 1.5, 2] as const;
