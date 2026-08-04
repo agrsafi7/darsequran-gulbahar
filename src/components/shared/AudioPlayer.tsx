@@ -149,7 +149,7 @@ export function AudioPlayer({ src, title, playing: desiredPlaying, onPlayingChan
         <button
           type="button"
           onClick={() => skip(-10)}
-          disabled={loading}
+          disabled={!duration}
           aria-label="Rewind 10 seconds"
           className="relative opacity-90 hover:opacity-100 transition disabled:opacity-40"
         >
