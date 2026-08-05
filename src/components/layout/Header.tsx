@@ -36,17 +36,45 @@ export function Header() {
 
   const isActive = (href: string) => location.pathname === href;
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 w-full footer-gradient border-b border-primary-foreground/10 text-primary-foreground">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full footer-gradient text-primary-foreground",
+        "border-b transition-[box-shadow,border-color,background-color] duration-300",
+        isScrolled
+          ? "border-accent/30 shadow-lg shadow-black/20 header-scrolled"
+          : "border-primary-foreground/10"
+      )}
+    >
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between lg:h-20">
+        <div
+          className={cn(
+            "flex items-center justify-between transition-[height] duration-300",
+            isScrolled ? "h-14 lg:h-16" : "h-16 lg:h-20"
+          )}
+        >
           {/* Logo */}
           <a href={siteConfig.domain} className="flex items-center gap-2 sm:gap-3 group">
             <img 
               src={logo} 
               alt={siteConfig.name} 
-              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain"
+              className={cn(
+                "object-contain bg-white rounded-full p-1 ring-1 ring-accent/40 shadow-sm transition-all duration-300",
+                isScrolled
+                  ? "w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12"
+                  : "w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14"
+              )}
             />
+
             <div>
               <h1 className="font-heading text-sm sm:text-lg lg:text-xl text-primary-foreground leading-tight">
                 {siteConfig.name}
