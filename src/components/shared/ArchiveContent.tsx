@@ -222,9 +222,9 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                   tabIndex={isActive ? 0 : -1}
                   onKeyDown={(e) => onRowKeyDown(e, index, file)}
                   onClick={() => selectFile(file)}
-                  className={`flex items-center justify-between gap-3 px-4 py-4 cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset ${
+                  className={`flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-3 sm:py-4 cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset ${
                     isActive
-                      ? "bg-primary/10 border-l-4 border-l-primary pl-3"
+                      ? "bg-primary/10 border-l-4 border-l-primary pl-1.5 sm:pl-3"
                       : index % 2 === 0
                       ? "bg-muted/30"
                       : "bg-background"
@@ -237,7 +237,7 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                       selectFile(file);
                     }}
                     aria-label={isCurrentlyPlaying ? `Pause ${displayLabel}` : `Play ${displayLabel}`}
-                    className={`shrink-0 flex items-center justify-center h-10 w-10 rounded-full transition-all ${
+                    className={`shrink-0 flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-full transition-all ${
                       isActive
                         ? "bg-primary text-primary-foreground shadow-md"
                         : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
@@ -252,12 +252,12 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
 
                   <div className="flex-1 min-w-0">
                     <span
-                      className={`block font-medium text-base md:text-lg leading-snug truncate ${
+                      className={`block font-medium text-sm sm:text-base md:text-lg leading-snug break-words ${
                         isActive ? "text-primary" : "text-foreground"
                       }`}
                       title={displayLabel}
                     >
-                      <span className="text-muted-foreground tabular-nums text-sm mr-2">
+                      <span className="text-muted-foreground tabular-nums text-xs sm:text-sm mr-1.5">
                         {index + 1}.
                       </span>
                       {displayLabel}
@@ -275,15 +275,15 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                     </span>
 
                     {(file.length || file.size) && (
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+                      <div className="flex items-center gap-3 sm:gap-4 text-[11px] sm:text-xs text-muted-foreground mt-1.5">
                         {file.length && (
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 whitespace-nowrap">
                             <Clock className="h-3 w-3" />
                             {formatDuration(file.length)}
                           </span>
                         )}
                         {file.size && (
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 whitespace-nowrap">
                             <HardDrive className="h-3 w-3" />
                             {formatFileSize(file.size)}
                           </span>
@@ -292,13 +292,14 @@ export function ArchiveContent({ itemId }: ArchiveContentProps) {
                     )}
                   </div>
 
-                  <div onClick={(e) => e.stopPropagation()}>
+                  <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                     <DownloadButton
                       url={file.downloadUrl}
                       filename={displayLabel}
                       itemId={itemId}
                     />
                   </div>
+
                 </div>
               );
             })}
