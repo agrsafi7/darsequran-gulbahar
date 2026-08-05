@@ -78,7 +78,7 @@ export function DownloadButton({ url, filename, itemId }: DownloadButtonProps) {
   const showBar = downloading && progress;
 
   return (
-    <div className="ml-2 shrink-0 flex flex-col items-end gap-1 min-w-[110px] sm:min-w-[160px]">
+    <div className="ml-1 sm:ml-2 shrink-0 flex flex-col items-end gap-1 w-auto min-w-0 sm:min-w-[160px]">
       <div className="flex items-center gap-1.5 w-full">
         <button
           type="button"
