@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useNavigation, NavigationItem } from "@/hooks/useNavigation";
 import { siteConfig } from "@/lib/siteConfig";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 // Fallback navigation when database is unavailable
 const fallbackNavigation: NavigationItem[] = [
