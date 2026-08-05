@@ -150,9 +150,26 @@
     background: linear-gradient(135deg, hsl(210 18% 38%) 0%, hsl(210 20% 30%) 50%, hsl(210 18% 35%) 100%);
   }
 
+  /* Hero overlay - deliberately deeper/warmer than the header so the
+     slider reads as a separate surface from the sticky header */
   .hero-overlay {
-    background: linear-gradient(180deg, hsla(210 20% 28% / 0.9) 0%, hsla(210 18% 34% / 0.95) 100%);
+    background: linear-gradient(
+      170deg,
+      hsla(200 30% 8% / 0.72) 0%,
+      hsla(30 25% 10% / 0.62) 45%,
+      hsla(200 35% 6% / 0.88) 100%
+    );
   }
+
+  .dark .hero-overlay {
+    background: linear-gradient(
+      170deg,
+      hsla(200 40% 4% / 0.82) 0%,
+      hsla(30 30% 7% / 0.7) 45%,
+      hsla(200 45% 3% / 0.92) 100%
+    );
+  }
+
 
   /* Gold Accent Elements */
   .gold-accent {
@@ -207,6 +224,21 @@
   .footer-gradient {
     background: linear-gradient(180deg, hsl(210 18% 38%) 0%, hsl(210 20% 30%) 100%);
   }
+
+  .dark .footer-gradient {
+    background: linear-gradient(180deg, hsl(210 22% 18%) 0%, hsl(210 24% 12%) 100%);
+  }
+
+  /* Sticky header scrolled state - slightly deeper + blurred */
+  .header-scrolled {
+    background: linear-gradient(180deg, hsl(210 20% 32%) 0%, hsl(210 22% 25%) 100%);
+    backdrop-filter: blur(8px);
+  }
+
+  .dark .header-scrolled {
+    background: linear-gradient(180deg, hsl(210 24% 14%) 0%, hsl(210 26% 9%) 100%);
+  }
+
 
   /* Smooth Animations */
   .fade-in {
