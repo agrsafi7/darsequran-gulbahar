@@ -36,7 +36,7 @@ export function Header() {
   const isActive = (href: string) => location.pathname === href;
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b border-border/50">
+    <header className="sticky top-0 z-50 w-full footer-gradient border-b border-primary-foreground/10 text-primary-foreground">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between lg:h-20">
           {/* Logo */}
@@ -47,17 +47,17 @@ export function Header() {
               className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain"
             />
             <div>
-              <h1 className="font-heading text-sm sm:text-lg lg:text-xl text-primary leading-tight">
+              <h1 className="font-heading text-sm sm:text-lg lg:text-xl text-primary-foreground leading-tight">
                 {siteConfig.name}
               </h1>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">{siteConfig.subtitle}</p>
+              <p className="text-[10px] sm:text-xs text-primary-foreground/60">{siteConfig.subtitle}</p>
             </div>
           </a>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center">
             {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary-foreground/70" />
             ) : (
               <NavigationMenu>
                 <NavigationMenuList className="gap-1">
@@ -67,8 +67,8 @@ export function Header() {
                         <>
                           <NavigationMenuTrigger 
                             className={cn(
-                              "nav-link bg-transparent hover:bg-secondary/50",
-                              isActive(item.href) && "text-primary font-semibold"
+                              "nav-link bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-accent focus:bg-primary-foreground/10 data-[state=open]:bg-primary-foreground/10",
+                              isActive(item.href) && "text-accent font-semibold"
                             )}
                           >
                             {item.title}
@@ -101,8 +101,8 @@ export function Header() {
                               href={siteConfig.domain}
                               className={cn(
                                 "nav-link inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
-                                "hover:bg-secondary/50 hover:text-primary focus:bg-secondary/50",
-                                isActive(item.href) && "text-primary font-semibold active"
+                                "text-primary-foreground hover:bg-primary-foreground/10 hover:text-accent focus:bg-primary-foreground/10",
+                                isActive(item.href) && "text-accent font-semibold active"
                               )}
                             >
                               {item.title}
@@ -112,8 +112,8 @@ export function Header() {
                               to={item.href}
                               className={cn(
                                 "nav-link inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
-                                "hover:bg-secondary/50 hover:text-primary focus:bg-secondary/50",
-                                isActive(item.href) && "text-primary font-semibold active"
+                                "text-primary-foreground hover:bg-primary-foreground/10 hover:text-accent focus:bg-primary-foreground/10",
+                                isActive(item.href) && "text-accent font-semibold active"
                               )}
                             >
                               {item.title}
@@ -132,7 +132,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden text-primary-foreground hover:bg-primary-foreground/10 hover:text-accent"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -145,7 +145,7 @@ export function Header() {
           <nav className="lg:hidden pb-4 animate-slide-down">
             {isLoading ? (
               <div className="flex justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <Loader2 className="h-5 w-5 animate-spin text-primary-foreground/70" />
               </div>
             ) : (
               <ul className="space-y-1">
@@ -157,8 +157,8 @@ export function Header() {
                           onClick={() => setOpenDropdown(openDropdown === item.title ? null : item.title)}
                           className={cn(
                             "flex w-full items-center justify-between rounded-md px-4 py-3 text-sm font-medium transition-colors",
-                            "hover:bg-secondary/50 hover:text-primary",
-                            isActive(item.href) && "text-primary font-semibold"
+                            "text-primary-foreground hover:bg-primary-foreground/10 hover:text-accent",
+                            isActive(item.href) && "text-accent font-semibold"
                           )}
                         >
                           {item.title}
@@ -178,8 +178,8 @@ export function Header() {
                                   onClick={() => setIsMobileMenuOpen(false)}
                                   className={cn(
                                     "block rounded-md px-4 py-2 text-sm transition-colors",
-                                    "hover:bg-secondary/50 hover:text-primary",
-                                    isActive(child.href) && "bg-secondary text-primary font-medium"
+                                    "text-primary-foreground/90 hover:bg-primary-foreground/10 hover:text-accent",
+                                    isActive(child.href) && "bg-primary-foreground/10 text-accent font-medium"
                                   )}
                                 >
                                   {child.title}
@@ -195,8 +195,8 @@ export function Header() {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={cn(
                           "block rounded-md px-4 py-3 text-sm font-medium transition-colors",
-                          "hover:bg-secondary/50 hover:text-primary",
-                          isActive(item.href) && "text-primary font-semibold bg-secondary/30"
+                          "text-primary-foreground hover:bg-primary-foreground/10 hover:text-accent",
+                          isActive(item.href) && "text-accent font-semibold bg-primary-foreground/10"
                         )}
                       >
                         {item.title}
@@ -207,8 +207,8 @@ export function Header() {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={cn(
                           "block rounded-md px-4 py-3 text-sm font-medium transition-colors",
-                          "hover:bg-secondary/50 hover:text-primary",
-                          isActive(item.href) && "text-primary font-semibold bg-secondary/30"
+                          "text-primary-foreground hover:bg-primary-foreground/10 hover:text-accent",
+                          isActive(item.href) && "text-accent font-semibold bg-primary-foreground/10"
                         )}
                       >
                         {item.title}
