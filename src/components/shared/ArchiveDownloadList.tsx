@@ -120,15 +120,16 @@ export function ArchiveDownloadList({ itemId }: ArchiveDownloadListProps) {
           return (
             <div
               key={file.name}
-              className={`flex items-center justify-between px-4 py-5 transition-colors ${index % 2 === 0 ? 'bg-muted/30' : 'bg-background'} hover:bg-muted/50`}
+              className={`flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-4 sm:py-5 transition-colors ${index % 2 === 0 ? 'bg-muted/30' : 'bg-background'} hover:bg-muted/50`}
             >
               <div className="flex-1 min-w-0">
                 <span
-                  className="block font-medium text-foreground text-base md:text-lg leading-snug truncate"
+                  className="block font-medium text-foreground text-sm sm:text-base md:text-lg leading-snug break-words"
                   title={displayLabel}
                 >
                   {displayLabel}
                 </span>
+
 
                 {(file.length || file.size) && (
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
