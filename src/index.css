@@ -225,6 +225,21 @@
     background: linear-gradient(180deg, hsl(210 18% 38%) 0%, hsl(210 20% 30%) 100%);
   }
 
+  .dark .footer-gradient {
+    background: linear-gradient(180deg, hsl(210 22% 18%) 0%, hsl(210 24% 12%) 100%);
+  }
+
+  /* Sticky header scrolled state - slightly deeper + blurred */
+  .header-scrolled {
+    background: linear-gradient(180deg, hsl(210 20% 32%) 0%, hsl(210 22% 25%) 100%);
+    backdrop-filter: blur(8px);
+  }
+
+  .dark .header-scrolled {
+    background: linear-gradient(180deg, hsl(210 24% 14%) 0%, hsl(210 26% 9%) 100%);
+  }
+
+
   /* Smooth Animations */
   .fade-in {
     animation: fadeIn 0.5s ease-out;
