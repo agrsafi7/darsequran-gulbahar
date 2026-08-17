@@ -39,7 +39,7 @@ export function Footer() {
               />
               <div>
                 <h2 className="font-heading text-lg text-primary-foreground">{siteConfig.name}</h2>
-                <p className="text-xs text-primary-foreground/60">{siteConfig.subtitle}</p>
+                <p className="text-xs text-primary-foreground/80">{siteConfig.subtitle}</p>
               </div>
             </a>
             <p className="text-sm text-primary-foreground/80 leading-relaxed max-w-sm">
@@ -94,7 +94,7 @@ export function Footer() {
               ))}
             </div>
             <div className="mt-6">
-              <p className="text-sm text-primary-foreground/60">
+              <p className="text-sm text-primary-foreground/80">
                 Subscribe to our newsletter for updates
               </p>
             </div>
@@ -105,7 +105,7 @@ export function Footer() {
       {/* Copyright Bar */}
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 py-4">
-          <p className="text-sm text-primary-foreground/60 text-center">
+          <p className="text-sm text-primary-foreground/80 text-center">
             © {currentYear} DarseQuran Gulbahar Peshawar — All Rights Reserved
           </p>
         </div>

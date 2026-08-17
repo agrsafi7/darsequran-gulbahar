@@ -79,7 +79,7 @@ export function Header() {
               <h1 className="font-heading text-sm sm:text-lg lg:text-xl text-primary-foreground leading-tight">
                 {siteConfig.name}
               </h1>
-              <p className="text-[10px] sm:text-xs text-primary-foreground/60">{siteConfig.subtitle}</p>
+              <p className="text-[10px] sm:text-xs text-primary-foreground/80">{siteConfig.subtitle}</p>
             </div>
           </a>
 
