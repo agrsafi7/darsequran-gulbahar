@@ -35,7 +35,7 @@ export function Footer() {
                 alt={siteConfig.name} 
                 loading="lazy"
                 decoding="async"
-                className="w-14 h-14 object-contain bg-white rounded-full p-1"
+                className="w-14 h-14 shrink-0 aspect-square object-contain bg-white rounded-full p-1 ring-1 ring-accent/40"
               />
               <div>
                 <h2 className="font-heading text-lg text-primary-foreground">{siteConfig.name}</h2>
@@ -58,14 +58,14 @@ export function Footer() {
                     {link.href.startsWith("http") ? (
                       <a
                         href={link.href}
-                        className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200 inline-block py-1"
+                        className="text-sm text-primary-foreground/80 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm transition-colors duration-200 inline-block py-1"
                       >
                         {link.title}
                       </a>
                     ) : (
                       <Link
                         to={link.href}
-                        className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200 inline-block py-1"
+                        className="text-sm text-primary-foreground/80 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm transition-colors duration-200 inline-block py-1"
                       >
                         {link.title}
                       </Link>
