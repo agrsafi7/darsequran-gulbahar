@@ -150,24 +150,40 @@
     background: linear-gradient(135deg, hsl(210 18% 38%) 0%, hsl(210 20% 30%) 50%, hsl(210 18% 35%) 100%);
   }
 
-  /* Hero overlay - deliberately deeper/warmer than the header so the
-     slider reads as a separate surface from the sticky header */
+  /* Hero overlay - deliberately deeper/warmer than the slate header so the
+     slider reads as a separate surface from the sticky header.
+     Two stacked layers: a warm diagonal wash + a bottom/left vignette that
+     guarantees text contrast regardless of the underlying photo. */
   .hero-overlay {
-    background: linear-gradient(
-      170deg,
-      hsla(200 30% 8% / 0.72) 0%,
-      hsla(30 25% 10% / 0.62) 45%,
-      hsla(200 35% 6% / 0.88) 100%
-    );
+    background:
+      linear-gradient(
+        100deg,
+        hsla(28 40% 8% / 0.86) 0%,
+        hsla(28 30% 10% / 0.7) 38%,
+        hsla(24 25% 12% / 0.42) 100%
+      ),
+      linear-gradient(
+        180deg,
+        hsla(200 45% 6% / 0.55) 0%,
+        hsla(200 40% 7% / 0.3) 45%,
+        hsla(200 50% 4% / 0.8) 100%
+      );
   }
 
   .dark .hero-overlay {
-    background: linear-gradient(
-      170deg,
-      hsla(200 40% 4% / 0.82) 0%,
-      hsla(30 30% 7% / 0.7) 45%,
-      hsla(200 45% 3% / 0.92) 100%
-    );
+    background:
+      linear-gradient(
+        100deg,
+        hsla(28 45% 4% / 0.9) 0%,
+        hsla(28 35% 6% / 0.78) 38%,
+        hsla(24 30% 7% / 0.55) 100%
+      ),
+      linear-gradient(
+        180deg,
+        hsla(200 55% 3% / 0.65) 0%,
+        hsla(200 45% 4% / 0.42) 45%,
+        hsla(200 60% 2% / 0.88) 100%
+      );
   }
 
 

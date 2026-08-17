@@ -35,11 +35,11 @@ export function Footer() {
                 alt={siteConfig.name} 
                 loading="lazy"
                 decoding="async"
-                className="w-14 h-14 object-contain bg-white rounded-full p-1"
+                className="w-14 h-14 shrink-0 aspect-square object-contain bg-white rounded-full p-1 ring-1 ring-accent/40"
               />
               <div>
                 <h2 className="font-heading text-lg text-primary-foreground">{siteConfig.name}</h2>
-                <p className="text-xs text-primary-foreground/60">{siteConfig.subtitle}</p>
+                <p className="text-xs text-primary-foreground/80">{siteConfig.subtitle}</p>
               </div>
             </a>
             <p className="text-sm text-primary-foreground/80 leading-relaxed max-w-sm">
@@ -58,14 +58,14 @@ export function Footer() {
                     {link.href.startsWith("http") ? (
                       <a
                         href={link.href}
-                        className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200 inline-block py-1"
+                        className="text-sm text-primary-foreground/80 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm transition-colors duration-200 inline-block py-1"
                       >
                         {link.title}
                       </a>
                     ) : (
                       <Link
                         to={link.href}
-                        className="text-sm text-primary-foreground/80 hover:text-accent transition-colors duration-200 inline-block py-1"
+                        className="text-sm text-primary-foreground/80 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-sm transition-colors duration-200 inline-block py-1"
                       >
                         {link.title}
                       </Link>
@@ -94,7 +94,7 @@ export function Footer() {
               ))}
             </div>
             <div className="mt-6">
-              <p className="text-sm text-primary-foreground/60">
+              <p className="text-sm text-primary-foreground/80">
                 Subscribe to our newsletter for updates
               </p>
             </div>
@@ -105,7 +105,7 @@ export function Footer() {
       {/* Copyright Bar */}
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 py-4">
-          <p className="text-sm text-primary-foreground/60 text-center">
+          <p className="text-sm text-primary-foreground/80 text-center">
             © {currentYear} DarseQuran Gulbahar Peshawar — All Rights Reserved
           </p>
         </div>
