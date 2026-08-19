@@ -90,7 +90,38 @@ const Contact = () => {
         </div>
       </section>
 
+      {/* Map Section — placeholder; exact location will be updated when the address is provided */}
+      <section className="py-16 lg:py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MapPin className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="font-heading text-2xl md:text-3xl text-foreground">Our Location</h2>
+            </div>
+            <div className="rounded-xl overflow-hidden border border-border shadow-lg bg-card aspect-[16/9] md:aspect-[21/9]">
+              <iframe
+                title="DarseQuran Gulbahar Peshawar Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13218.4021!2d71.55!3d34.02!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDAxJzEyLjAiTiA3McKwMzMnMDAuMCJF!5e0!3m2!1sen!2s!4v1"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-full"
+              />
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground text-center">
+              Map placeholder — exact location will be set once the address is provided.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section */}
+
       <section className="py-16 lg:py-24">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
