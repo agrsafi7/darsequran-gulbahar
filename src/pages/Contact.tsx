@@ -79,7 +79,7 @@ const Contact = () => {
 
   const mapEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${
     import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY
-  }&q=place_id:${GOOGLE_MAPS_PLACE_ID}`;
+  }&q=${encodeURIComponent(`${LOCATION.lat},${LOCATION.lng}`)}`;
 
   return (
     <Layout>
