@@ -20,7 +20,12 @@ interface ContactSettings {
   hours: string;
 }
 
-const GOOGLE_MAPS_PLACE_ID = "0x38d93d6b76417add:0x1f9e059caa2498ce";
+const LOCATION = {
+  lat: 34.0084358,
+  lng: 71.5931517,
+  name: "Ishaat Ul Quran Gulbahar",
+  address: "2H5V+97C, Gulbahar, Peshawar, Pakistan",
+};
 
 const Contact = () => {
   const [page, setPage] = useState<Page | null>(null);
