@@ -20,6 +20,13 @@ interface ContactSettings {
   hours: string;
 }
 
+const LOCATION = {
+  lat: 34.0084358,
+  lng: 71.5931517,
+  name: "Ishaat Ul Quran Gulbahar",
+  address: "2H5V+97C, Gulbahar, Peshawar, Pakistan",
+};
+
 const Contact = () => {
   const [page, setPage] = useState<Page | null>(null);
   const [contactInfo, setContactInfo] = useState<ContactSettings>({
@@ -36,8 +43,7 @@ const Contact = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    
-    // Fetch page content and contact settings in parallel
+
     const [pageResult, settingsResult] = await Promise.all([
       supabase
         .from("pages")
@@ -48,7 +54,7 @@ const Contact = () => {
       supabase
         .from("site_settings")
         .select("key, value")
-        .in("key", ["contact_address", "contact_phone", "contact_email", "contact_hours"])
+        .in("key", ["contact_address", "contact_phone", "contact_email", "contact_hours"]),
     ]);
 
     if (!pageResult.error && pageResult.data) {
@@ -67,9 +73,13 @@ const Contact = () => {
         hours: settingsMap.contact_hours || "",
       });
     }
-    
+
     setLoading(false);
   };
+
+  const mapEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${
+    import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY
+  }&q=${encodeURIComponent(`${LOCATION.lat},${LOCATION.lng}`)}`;
 
   return (
     <Layout>
@@ -90,41 +100,10 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Map Section — placeholder; exact location will be updated when the address is provided */}
-      <section className="py-16 lg:py-20 bg-muted/30">
+      {/* Main Content - Map + Contact Info side by side on large screens */}
+      <section className="py-12 lg:py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-primary" />
-              </div>
-              <h2 className="font-heading text-2xl md:text-3xl text-foreground">Our Location</h2>
-            </div>
-            <div className="rounded-xl overflow-hidden border border-border shadow-lg bg-card aspect-[16/9] md:aspect-[21/9]">
-              <iframe
-                title="DarseQuran Gulbahar Peshawar Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13218.4021!2d71.55!3d34.02!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDAxJzEyLjAiTiA3McKwMzMnMDAuMCJF!5e0!3m2!1sen!2s!4v1"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="w-full h-full"
-              />
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground text-center">
-              Map placeholder — exact location will be set once the address is provided.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Dynamic Content from Database */}
             <div>
               {loading ? (
@@ -146,66 +125,93 @@ const Contact = () => {
               )}
             </div>
 
-            {/* Contact Information Cards */}
-            <div className="space-y-6">
-              <h2 className="font-heading text-3xl text-foreground mb-6">Contact Information</h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Card className="card-elevated border-0">
-                  <CardHeader className="pb-2">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                      <MapPin className="w-6 h-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">Address</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground text-sm whitespace-pre-line">
-                      {contactInfo.address || "Address not set"}
-                    </p>
-                  </CardContent>
-                </Card>
+            {/* Right Column: Map + Contact Information Cards */}
+            <div className="space-y-8 lg:sticky lg:top-24">
+              {/* Map */}
+              <div className="rounded-xl overflow-hidden border border-border shadow-lg bg-card">
+                <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <h2 className="font-heading text-xl md:text-2xl text-foreground">Our Location</h2>
+                </div>
+                <div className="aspect-[4/3] md:aspect-[16/10] lg:aspect-[4/3] w-full">
+                  <iframe
+                    title="Ishaat Ul Quran Gulbahar Peshawar Location"
+                    src={mapEmbedUrl}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
 
-                <Card className="card-elevated border-0">
-                  <CardHeader className="pb-2">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                      <Phone className="w-6 h-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">Phone</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground text-sm whitespace-pre-line">
-                      {contactInfo.phone || "Phone not set"}
-                    </p>
-                  </CardContent>
-                </Card>
+              {/* Contact Information Cards */}
+              <div>
+                <h2 className="font-heading text-2xl md:text-3xl text-foreground mb-6">
+                  Contact Information
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Card className="card-elevated border-0">
+                    <CardHeader className="pb-2">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                        <MapPin className="w-6 h-6 text-primary" />
+                      </div>
+                      <CardTitle className="text-lg">Address</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground text-sm whitespace-pre-line">
+                        {contactInfo.address || "Address not set"}
+                      </p>
+                    </CardContent>
+                  </Card>
 
-                <Card className="card-elevated border-0">
-                  <CardHeader className="pb-2">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                      <Mail className="w-6 h-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">Email</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground text-sm whitespace-pre-line">
-                      {contactInfo.email || "Email not set"}
-                    </p>
-                  </CardContent>
-                </Card>
+                  <Card className="card-elevated border-0">
+                    <CardHeader className="pb-2">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                        <Phone className="w-6 h-6 text-primary" />
+                      </div>
+                      <CardTitle className="text-lg">Phone</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground text-sm whitespace-pre-line">
+                        {contactInfo.phone || "Phone not set"}
+                      </p>
+                    </CardContent>
+                  </Card>
 
-                <Card className="card-elevated border-0">
-                  <CardHeader className="pb-2">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                      <Clock className="w-6 h-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">Hours</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground text-sm whitespace-pre-line">
-                      {contactInfo.hours || "Hours not set"}
-                    </p>
-                  </CardContent>
-                </Card>
+                  <Card className="card-elevated border-0">
+                    <CardHeader className="pb-2">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                        <Mail className="w-6 h-6 text-primary" />
+                      </div>
+                      <CardTitle className="text-lg">Email</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground text-sm whitespace-pre-line">
+                        {contactInfo.email || "Email not set"}
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="card-elevated border-0">
+                    <CardHeader className="pb-2">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                        <Clock className="w-6 h-6 text-primary" />
+                      </div>
+                      <CardTitle className="text-lg">Hours</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground text-sm whitespace-pre-line">
+                        {contactInfo.hours || "Hours not set"}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           </div>
