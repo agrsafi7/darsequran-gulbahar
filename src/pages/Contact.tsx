@@ -77,9 +77,11 @@ const Contact = () => {
     setLoading(false);
   };
 
-  const mapEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${
-    import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY
-  }&q=${encodeURIComponent(`${LOCATION.lat},${LOCATION.lng}`)}`;
+  // Keyless Google Maps embed (no API key required)
+  const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(
+    `${LOCATION.lat},${LOCATION.lng}`
+  )}&z=16&hl=en&output=embed`;
+
 
   return (
     <Layout>
