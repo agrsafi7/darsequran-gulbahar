@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Phone, Mail, Clock, Copy, Share2, ExternalLink } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { siteConfig } from "@/lib/siteConfig";
 
 interface Page {
   id: string;
@@ -25,7 +28,9 @@ const LOCATION = {
   lng: 71.5931517,
   name: "Ishaat Ul Quran Gulbahar",
   address: "2H5V+97C, Gulbahar, Peshawar, Pakistan",
+  shareUrl: "https://maps.app.goo.gl/qv7qKkfGrbhj7ju77",
 };
+
 
 const Contact = () => {
   const [page, setPage] = useState<Page | null>(null);
