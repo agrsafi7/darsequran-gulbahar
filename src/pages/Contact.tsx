@@ -82,14 +82,76 @@ const Contact = () => {
     setLoading(false);
   };
 
-  // Keyless Google Maps embed (no API key required)
+  // Keyless Google Maps embed (no API key required) — query by name so the
+  // place label/marker title is visible on the map.
+  const mapQuery = `${LOCATION.name}, ${LOCATION.address}`;
   const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(
-    `${LOCATION.lat},${LOCATION.lng}`
-  )}&z=16&hl=en&output=embed`;
+    mapQuery
+  )}&ll=${LOCATION.lat},${LOCATION.lng}&z=16&hl=en&output=embed`;
+  const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    mapQuery
+  )}`;
 
+  const displayAddress = contactInfo.address || LOCATION.address;
+
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(`${LOCATION.name}, ${displayAddress}`);
+      toast.success("Address copied to clipboard");
+    } catch {
+      toast.error("Could not copy the address");
+    }
+  };
+
+  const handleShareLocation = async () => {
+    const shareData = {
+      title: LOCATION.name,
+      text: `${LOCATION.name} — ${displayAddress}`,
+      url: LOCATION.shareUrl,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      await navigator.clipboard.writeText(LOCATION.shareUrl);
+      toast.success("Location link copied to clipboard");
+    } catch {
+      // user cancelled share sheet — no error needed
+    }
+  };
+
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    name: siteConfig.name,
+    alternateName: LOCATION.name,
+    url: `${siteConfig.domain}/contact`,
+    hasMap: LOCATION.shareUrl,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: LOCATION.address,
+      addressLocality: "Peshawar",
+      addressRegion: "Khyber Pakhtunkhwa",
+      addressCountry: "PK",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: LOCATION.lat,
+      longitude: LOCATION.lng,
+    },
+    ...(contactInfo.phone ? { telephone: contactInfo.phone } : {}),
+    ...(contactInfo.email ? { email: contactInfo.email } : {}),
+    ...(contactInfo.hours ? { openingHours: contactInfo.hours } : {}),
+  };
 
   return (
     <Layout>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 hero-gradient overflow-hidden">
         <div className="absolute inset-0 pattern-bg opacity-20" />
