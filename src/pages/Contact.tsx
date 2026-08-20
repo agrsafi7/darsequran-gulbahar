@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Phone, Mail, Clock, Copy, Share2, ExternalLink } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { siteConfig } from "@/lib/siteConfig";
 
 interface Page {
   id: string;
@@ -25,7 +28,9 @@ const LOCATION = {
   lng: 71.5931517,
   name: "Ishaat Ul Quran Gulbahar",
   address: "2H5V+97C, Gulbahar, Peshawar, Pakistan",
+  shareUrl: "https://maps.app.goo.gl/qv7qKkfGrbhj7ju77",
 };
+
 
 const Contact = () => {
   const [page, setPage] = useState<Page | null>(null);
@@ -77,14 +82,76 @@ const Contact = () => {
     setLoading(false);
   };
 
-  // Keyless Google Maps embed (no API key required)
+  // Keyless Google Maps embed (no API key required) — query by name so the
+  // place label/marker title is visible on the map.
+  const mapQuery = `${LOCATION.name}, ${LOCATION.address}`;
   const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(
-    `${LOCATION.lat},${LOCATION.lng}`
-  )}&z=16&hl=en&output=embed`;
+    mapQuery
+  )}&ll=${LOCATION.lat},${LOCATION.lng}&z=16&hl=en&output=embed`;
+  const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    mapQuery
+  )}`;
 
+  const displayAddress = contactInfo.address || LOCATION.address;
+
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(`${LOCATION.name}, ${displayAddress}`);
+      toast.success("Address copied to clipboard");
+    } catch {
+      toast.error("Could not copy the address");
+    }
+  };
+
+  const handleShareLocation = async () => {
+    const shareData = {
+      title: LOCATION.name,
+      text: `${LOCATION.name} — ${displayAddress}`,
+      url: LOCATION.shareUrl,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      await navigator.clipboard.writeText(LOCATION.shareUrl);
+      toast.success("Location link copied to clipboard");
+    } catch {
+      // user cancelled share sheet — no error needed
+    }
+  };
+
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "Place",
+    name: siteConfig.name,
+    alternateName: LOCATION.name,
+    url: `${siteConfig.domain}/contact`,
+    hasMap: LOCATION.shareUrl,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: LOCATION.address,
+      addressLocality: "Peshawar",
+      addressRegion: "Khyber Pakhtunkhwa",
+      addressCountry: "PK",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: LOCATION.lat,
+      longitude: LOCATION.lng,
+    },
+    ...(contactInfo.phone ? { telephone: contactInfo.phone } : {}),
+    ...(contactInfo.email ? { email: contactInfo.email } : {}),
+    ...(contactInfo.hours ? { openingHours: contactInfo.hours } : {}),
+  };
 
   return (
     <Layout>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 hero-gradient overflow-hidden">
         <div className="absolute inset-0 pattern-bg opacity-20" />
@@ -132,14 +199,24 @@ const Contact = () => {
               {/* Map */}
               <div className="rounded-xl overflow-hidden border border-border shadow-lg bg-card">
                 <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                     <MapPin className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="font-heading text-xl md:text-2xl text-foreground">Our Location</h2>
+                  <div className="min-w-0">
+                    <h2 className="font-heading text-xl md:text-2xl text-foreground">
+                      Our Location
+                    </h2>
+                    <p className="text-sm text-muted-foreground truncate">{LOCATION.name}</p>
+                  </div>
                 </div>
-                <div className="aspect-[4/3] md:aspect-[16/10] lg:aspect-[4/3] w-full">
+                <div
+                  role="region"
+                  aria-label={`Map showing the location of ${LOCATION.name} in Gulbahar, Peshawar`}
+                  className="w-full h-[260px] sm:h-[320px] lg:h-[380px] xl:h-[420px]"
+                >
                   <iframe
-                    title="Ishaat Ul Quran Gulbahar Peshawar Location"
+                    title={`Google Map of ${LOCATION.name}, ${LOCATION.address}`}
+                    aria-label={`Google Map of ${LOCATION.name}, ${LOCATION.address}`}
                     src={mapEmbedUrl}
                     width="100%"
                     height="100%"
@@ -150,7 +227,34 @@ const Contact = () => {
                     className="w-full h-full"
                   />
                 </div>
+                <div className="p-4 border-t border-border space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    {LOCATION.name} — {LOCATION.address}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button asChild variant="default" size="sm">
+                      <a
+                        href={directionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Open ${LOCATION.name} in Google Maps in a new tab`}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1.5" />
+                        Open in Google Maps
+                      </a>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleCopyAddress}>
+                      <Copy className="w-4 h-4 mr-1.5" />
+                      Copy address
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleShareLocation}>
+                      <Share2 className="w-4 h-4 mr-1.5" />
+                      Share location
+                    </Button>
+                  </div>
+                </div>
               </div>
+
 
               {/* Contact Information Cards */}
               <div>
