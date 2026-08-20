@@ -199,14 +199,24 @@ const Contact = () => {
               {/* Map */}
               <div className="rounded-xl overflow-hidden border border-border shadow-lg bg-card">
                 <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                     <MapPin className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="font-heading text-xl md:text-2xl text-foreground">Our Location</h2>
+                  <div className="min-w-0">
+                    <h2 className="font-heading text-xl md:text-2xl text-foreground">
+                      Our Location
+                    </h2>
+                    <p className="text-sm text-muted-foreground truncate">{LOCATION.name}</p>
+                  </div>
                 </div>
-                <div className="aspect-[4/3] md:aspect-[16/10] lg:aspect-[4/3] w-full">
+                <div
+                  role="region"
+                  aria-label={`Map showing the location of ${LOCATION.name} in Gulbahar, Peshawar`}
+                  className="w-full h-[260px] sm:h-[320px] lg:h-[380px] xl:h-[420px]"
+                >
                   <iframe
-                    title="Ishaat Ul Quran Gulbahar Peshawar Location"
+                    title={`Google Map of ${LOCATION.name}, ${LOCATION.address}`}
+                    aria-label={`Google Map of ${LOCATION.name}, ${LOCATION.address}`}
                     src={mapEmbedUrl}
                     width="100%"
                     height="100%"
@@ -217,7 +227,34 @@ const Contact = () => {
                     className="w-full h-full"
                   />
                 </div>
+                <div className="p-4 border-t border-border space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    {LOCATION.name} — {LOCATION.address}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button asChild variant="default" size="sm">
+                      <a
+                        href={directionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Open ${LOCATION.name} in Google Maps in a new tab`}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1.5" />
+                        Open in Google Maps
+                      </a>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleCopyAddress}>
+                      <Copy className="w-4 h-4 mr-1.5" />
+                      Copy address
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleShareLocation}>
+                      <Share2 className="w-4 h-4 mr-1.5" />
+                      Share location
+                    </Button>
+                  </div>
+                </div>
               </div>
+
 
               {/* Contact Information Cards */}
               <div>
