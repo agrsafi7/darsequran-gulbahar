@@ -161,6 +161,9 @@ const Contact = () => {
     ...(contactInfo.hours ? { openingHours: contactInfo.hours } : {}),
   };
 
+  const pageContent = stripDuplicateHeading(page?.content ?? null, page?.title);
+
+
   return (
     <Layout>
       <script
