@@ -220,7 +220,7 @@ const Contact = () => {
 
 
             {/* Right Column: Map + Contact Information Cards */}
-            <div className="space-y-8 lg:sticky lg:top-24">
+            <div className="space-y-8 lg:sticky lg:top-24 xl:grid xl:grid-cols-2 xl:items-start xl:gap-8 xl:space-y-0">
               {/* Map */}
               <div className="rounded-xl overflow-hidden border border-border shadow-lg bg-card">
                 <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
