@@ -1,0 +1,6 @@
+{
+  "name": "DarseQuran Gulbahar Peshawar",
+  "description": "مرکز اشاعت القرآن گلبہار - Spreading the true meaning of Quran in simple method and interpreting Islam according to the teachings of Quran and Sunnah in Pashto and Urdu languages.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

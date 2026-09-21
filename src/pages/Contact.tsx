@@ -12,7 +12,7 @@ import contactIllustration from "@/assets/contact-illustration.png";
 /** Removes a leading heading that just repeats the page title (avoids duplicate "Contact Us"). */
 const stripDuplicateHeading = (html: string | null, title?: string) => {
   if (!html) return "";
-  let out = html.replace(
+  const out = html.replace(
     /^\s*(?:<p>\s*<\/p>\s*)*<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/i,
     (match, inner: string) => {
       const text = inner.replace(/<[^>]*>/g, "").trim().toLowerCase();
