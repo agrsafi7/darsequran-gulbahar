@@ -10,6 +10,7 @@ import { ContentSidebar } from "@/components/shared/ContentSidebar";
 import { ArrowLeft, Calendar, Loader2, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { trackContentView } from "@/lib/analytics";
+import { siteConfig } from "@/lib/siteConfig";
 
 // Track post view in database (debounced to avoid duplicate views)
 const trackPostView = async (postId: string) => {
@@ -44,6 +45,22 @@ const specialRoutes: Record<string, { url: string; label: string }> = {
   "Complete Dars": { url: "/dars-e-quran/complete", label: "Complete Dars" },
 };
 
+// Build a short plain-text meta description from an excerpt or HTML content
+const toMetaDescription = (source: string | null, max = 160): string => {
+  if (!source) return "";
+  const text = source
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+};
+
 export default function PostDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<Post | null>(null);
@@ -57,6 +74,38 @@ export default function PostDetail() {
       fetchPost();
     }
   }, [slug]);
+
+  // Keep the browser tab title and meta description in sync with the loaded post
+  useEffect(() => {
+    const defaultTitle = document.title;
+    let metaDescription = document.querySelector('meta[name="description"]');
+    const defaultDescription = metaDescription?.getAttribute("content") ?? null;
+    const createdMeta = !metaDescription;
+
+    if (post) {
+      document.title = `${post.title} | ${siteConfig.name}`;
+      const description = toMetaDescription(post.excerpt || post.content);
+      if (description) {
+        if (!metaDescription) {
+          metaDescription = document.createElement("meta");
+          metaDescription.setAttribute("name", "description");
+          document.head.appendChild(metaDescription);
+        }
+        metaDescription.setAttribute("content", description);
+      }
+    }
+
+    return () => {
+      document.title = defaultTitle;
+      if (metaDescription) {
+        if (defaultDescription !== null) {
+          metaDescription.setAttribute("content", defaultDescription);
+        } else if (createdMeta) {
+          metaDescription.remove();
+        }
+      }
+    };
+  }, [post]);
 
   const fetchPost = async () => {
     setLoading(true);
