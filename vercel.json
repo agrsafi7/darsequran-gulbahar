@@ -1,5 +1,68 @@
 {
+  "redirects": [
+    {
+      "source": "/2023/08/daily-pashto-dars.html",
+      "destination": "/dars-e-quran",
+      "permanent": true
+    },
+    {
+      "source": "/p/download-duroos.html",
+      "destination": "/dars-e-quran/download",
+      "permanent": true
+    },
+    {
+      "source": "/p/books_12.html",
+      "destination": "/dars-e-quran",
+      "permanent": true
+    },
+    {
+      "source": "/2020/07/download-dora-tafseer-2019.html",
+      "destination": "/dars-e-quran/download",
+      "permanent": true
+    },
+    {
+      "source": "/2005/12/how-to-download-dars-from-archive_20.html",
+      "destination": "/dars-e-quran/download",
+      "permanent": true
+    },
+    {
+      "source": "/2019/01/weekly-dars-2018-2021.html",
+      "destination": "/dars-e-quran",
+      "permanent": true
+    },
+    {
+      "source": "/p/complete-dars-single-click.html",
+      "destination": "/dars-e-quran/complete",
+      "permanent": true
+    },
+    {
+      "source": "/2010/07/download-dora-tafseer-2008.html",
+      "destination": "/dars-e-quran/download",
+      "permanent": true
+    },
+    {
+      "source": "/2015/05/download-weekly-dars-2014-2018.html",
+      "destination": "/dars-e-quran",
+      "permanent": true
+    },
+    {
+      "source": "/2013/06/dora-tafseer-2013.html",
+      "destination": "/dars-e-quran",
+      "permanent": true
+    },
+    {
+      "source": "/2009/02/dora-tafseer-2003-panjpir_20.html",
+      "destination": "/dars-e-quran",
+      "permanent": true
+    },
+    {
+      "source": "/p/contact-us_21.html",
+      "destination": "/contact",
+      "permanent": true
+    }
+  ],
   "rewrites": [
+
     {
       "source": "/sitemap.xml",
       "destination": "https://zvuvmutndauhptxrjkzz.supabase.co/functions/v1/sitemap"
