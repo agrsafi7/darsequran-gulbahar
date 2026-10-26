@@ -10,6 +10,7 @@ const navigationLinks = [
   { title: "Speeches", href: "/speeches" },
   { title: "Books", href: "/books" },
   { title: "Contact Us", href: "/contact" },
+  { title: "Privacy Policy", href: "/privacy-policy" },
 ];
 
 const socialLinks = [

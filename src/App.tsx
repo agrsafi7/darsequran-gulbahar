@@ -9,6 +9,7 @@ import { ScrollToTop } from "@/components/shared/ScrollToTop";
 import Index from "./pages/Index";
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const DarsEQuran = lazy(() => import("./pages/DarsEQuran"));
 const ListenOnline = lazy(() => import("./pages/dars/ListenOnline"));
 const DownloadDars = lazy(() => import("./pages/dars/DownloadDars"));
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/posts" element={<Posts />} />
             <Route path="/post/:slug" element={<PostDetail />} />
             <Route path="/page/:slug" element={<PageDetail />} />
