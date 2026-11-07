@@ -88,14 +88,10 @@ const LiveStreams = () => {
               platform="youtube"
               stream={youtubeStream}
               icon={<Youtube className="w-6 h-6" />}
-              color="red"
-              onSave={(url, isLive) =>
-                updateMutation.mutate({
-                  id: youtubeStream!.id,
-                  stream_url: url,
-                  is_live: isLive,
-                })
-              }
+              onSave={(url, isLive) => {
+                if (!youtubeStream) return;
+                updateMutation.mutate({ id: youtubeStream.id, stream_url: url, is_live: isLive });
+              }}
               isSaving={updateMutation.isPending}
             />
 
@@ -104,14 +100,10 @@ const LiveStreams = () => {
               platform="facebook"
               stream={facebookStream}
               icon={<Facebook className="w-6 h-6" />}
-              color="blue"
-              onSave={(url, isLive) =>
-                updateMutation.mutate({
-                  id: facebookStream!.id,
-                  stream_url: url,
-                  is_live: isLive,
-                })
-              }
+              onSave={(url, isLive) => {
+                if (!facebookStream) return;
+                updateMutation.mutate({ id: facebookStream.id, stream_url: url, is_live: isLive });
+              }}
               isSaving={updateMutation.isPending}
             />
           </div>
@@ -138,7 +130,6 @@ interface LiveStreamCardProps {
   platform: "youtube" | "facebook";
   stream: LiveStream | undefined;
   icon: React.ReactNode;
-  color: "red" | "blue";
   onSave: (url: string, isLive: boolean) => void;
   isSaving: boolean;
 }
@@ -147,7 +138,6 @@ function LiveStreamCard({
   platform,
   stream,
   icon,
-  color,
   onSave,
   isSaving,
 }: LiveStreamCardProps) {
@@ -165,29 +155,16 @@ function LiveStreamCard({
   const hasChanges =
     url !== (stream?.stream_url || "") || isLive !== (stream?.is_live || false);
 
-  const colorClasses = {
-    red: {
-      bg: "bg-red-500/10",
-      border: "border-red-500/30",
-      icon: "text-red-500",
-    },
-    blue: {
-      bg: "bg-blue-600/10",
-      border: "border-blue-600/30",
-      icon: "text-blue-600",
-    },
-  };
-
   return (
-    <Card className={`${colorClasses[color].border} border-2`}>
-      <CardHeader className={colorClasses[color].bg}>
+    <Card>
+      <CardHeader>
         <div className="flex items-center gap-3">
-          <div className={colorClasses[color].icon}>{icon}</div>
+          <div className="text-muted-foreground">{icon}</div>
           <div>
             <CardTitle className="capitalize">{platform}</CardTitle>
             <CardDescription>
               {isLive ? (
-                <span className="text-green-600 font-medium">● Currently Live</span>
+                <span className="text-primary font-medium">● Currently Live</span>
               ) : (
                 <span className="text-muted-foreground">○ Not Live</span>
               )}

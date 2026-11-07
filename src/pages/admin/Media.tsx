@@ -167,9 +167,9 @@ export default function AdminMedia() {
   const otherCount = media.length - imageCount;
 
   const mediaStatCards = [
-    { title: "Total Files", value: media.length, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]", icon: ImageIcon },
-    { title: "Images", value: imageCount, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]", icon: ImageIcon },
-    { title: "Other Files", value: otherCount, bg: "bg-[hsl(262_60%_55%)]", iconBg: "bg-[hsl(262_60%_48%)]", icon: Upload },
+    { title: "Total Files", value: media.length, icon: ImageIcon },
+    { title: "Images", value: imageCount, icon: ImageIcon },
+    { title: "Other Files", value: otherCount, icon: Upload },
   ];
 
   return (
@@ -180,15 +180,15 @@ export default function AdminMedia() {
             {mediaStatCards.map((stat) => (
               <div
                 key={stat.title}
-                className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+                className="admin-stat"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                     <p className="mt-2 text-3xl font-bold font-sans">{stat.value}</p>
                   </div>
-                  <div className={`${stat.iconBg} rounded-full p-3`}>
-                    <stat.icon className="h-6 w-6 text-white/90" />
+                  <div className="admin-stat-icon">
+                    <stat.icon className="h-5 w-5" />
                   </div>
                 </div>
               </div>
@@ -279,7 +279,7 @@ export default function AdminMedia() {
                         <ImageIcon className="h-12 w-12 text-muted-foreground" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <div className="absolute inset-0 admin-media-overlay opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                       <Button
                         size="icon"
                         variant="secondary"

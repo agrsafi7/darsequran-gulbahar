@@ -112,10 +112,10 @@ export default function AdminComments() {
   const spamCount = comments.filter((c) => c.status === "spam").length;
 
   const commentStatCards = [
-    { title: "Total Comments", value: comments.length, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]", icon: MessageSquare },
-    { title: "Pending", value: pendingCount, bg: "bg-[hsl(42_75%_55%)]", iconBg: "bg-[hsl(42_75%_48%)]", icon: MessageSquare },
-    { title: "Approved", value: approvedCount, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]", icon: Check },
-    { title: "Spam", value: spamCount, bg: "bg-[hsl(0_70%_58%)]", iconBg: "bg-[hsl(0_70%_50%)]", icon: X },
+    { title: "Total Comments", value: comments.length, icon: MessageSquare },
+    { title: "Pending", value: pendingCount, icon: MessageSquare },
+    { title: "Approved", value: approvedCount, icon: Check },
+    { title: "Spam", value: spamCount, icon: X },
   ];
 
   return (
@@ -125,15 +125,15 @@ export default function AdminComments() {
           {commentStatCards.map((stat) => (
             <div
               key={stat.title}
-              className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+              className="admin-stat"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                   <p className="mt-2 text-3xl font-bold font-sans">{stat.value}</p>
                 </div>
-                <div className={`${stat.iconBg} rounded-full p-3`}>
-                  <stat.icon className="h-6 w-6 text-white/90" />
+                <div className="admin-stat-icon">
+                  <stat.icon className="h-5 w-5" />
                 </div>
               </div>
             </div>

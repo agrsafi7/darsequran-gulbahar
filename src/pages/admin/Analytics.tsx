@@ -171,10 +171,10 @@ export default function Analytics() {
   };
 
   const statCards = [
-    { title: "Total Posts", value: stats?.totalPosts ?? 0, icon: Newspaper, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]" },
-    { title: "Total Views", value: stats?.totalViews ?? 0, icon: Eye, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]" },
-    { title: "Published", value: stats?.publishedPosts ?? 0, icon: FileText, bg: "bg-[hsl(262_60%_55%)]", iconBg: "bg-[hsl(262_60%_48%)]" },
-    { title: "Comments", value: stats?.totalComments ?? 0, icon: MessageSquare, bg: "bg-[hsl(0_70%_58%)]", iconBg: "bg-[hsl(0_70%_50%)]" },
+    { title: "Total Posts", value: stats?.totalPosts ?? 0, icon: Newspaper },
+    { title: "Total Views", value: stats?.totalViews ?? 0, icon: Eye },
+    { title: "Published", value: stats?.publishedPosts ?? 0, icon: FileText },
+    { title: "Comments", value: stats?.totalComments ?? 0, icon: MessageSquare },
   ];
 
   if (loading) {
@@ -203,15 +203,15 @@ export default function Analytics() {
           {statCards.map((stat) => (
             <div
               key={stat.title}
-              className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+              className="admin-stat"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                   <p className="mt-2 text-3xl font-bold font-sans">{stat.value.toLocaleString()}</p>
                 </div>
-                <div className={`${stat.iconBg} rounded-full p-3`}>
-                  <stat.icon className="h-6 w-6 text-white/90" />
+                <div className="admin-stat-icon">
+                  <stat.icon className="h-5 w-5" />
                 </div>
               </div>
             </div>

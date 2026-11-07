@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,12 @@ export default function AdminPosts() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [dialogOpen, setDialogOpen] = useState(searchParams.get("new") === "1");
+
+  useEffect(() => {
+    if (searchParams.get("new") === "1") setDialogOpen(true);
+  }, [searchParams]);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -307,10 +313,10 @@ export default function AdminPosts() {
   const scheduledCount = posts.filter(p => p.status === "scheduled").length;
 
   const postStatCards = [
-    { title: "Total Posts", value: posts.length, bg: "bg-[hsl(205_75%_55%)]", iconBg: "bg-[hsl(205_75%_48%)]", icon: Newspaper },
-    { title: "Published", value: publishedCount, bg: "bg-[hsl(142_60%_45%)]", iconBg: "bg-[hsl(142_60%_38%)]", icon: FileText },
-    { title: "Drafts", value: draftCount, bg: "bg-[hsl(42_75%_55%)]", iconBg: "bg-[hsl(42_75%_48%)]", icon: Pencil },
-    { title: "Scheduled", value: scheduledCount, bg: "bg-[hsl(262_60%_55%)]", iconBg: "bg-[hsl(262_60%_48%)]", icon: CalendarIcon },
+    { title: "Total Posts", value: posts.length, icon: Newspaper },
+    { title: "Published", value: publishedCount, icon: FileText },
+    { title: "Drafts", value: draftCount, icon: Pencil },
+    { title: "Scheduled", value: scheduledCount, icon: CalendarIcon },
   ];
 
   return (
@@ -321,15 +327,15 @@ export default function AdminPosts() {
             {postStatCards.map((stat) => (
               <div
                 key={stat.title}
-                className={`${stat.bg} rounded-xl p-5 text-white shadow-md transition-transform hover:-translate-y-1 hover:shadow-lg`}
+                className="admin-stat"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                     <p className="mt-2 text-3xl font-bold font-sans">{stat.value}</p>
                   </div>
-                  <div className={`${stat.iconBg} rounded-full p-3`}>
-                    <stat.icon className="h-6 w-6 text-white/90" />
+                  <div className="admin-stat-icon">
+                    <stat.icon className="h-5 w-5" />
                   </div>
                 </div>
               </div>
@@ -341,7 +347,10 @@ export default function AdminPosts() {
           <CardTitle>Manage Posts</CardTitle>
           <Dialog open={dialogOpen} onOpenChange={(open) => {
             setDialogOpen(open);
-            if (!open) resetForm();
+            if (!open) {
+              resetForm();
+              if (searchParams.has("new")) setSearchParams({}, { replace: true });
+            }
           }}>
             <DialogTrigger asChild>
               <Button>

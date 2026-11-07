@@ -33,6 +33,7 @@ const AdminHeroSlides = lazy(() => import("./pages/admin/HeroSlides"));
 const AdminAdPlacements = lazy(() => import("./pages/admin/AdPlacements"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 const AdminLiveStreams = lazy(() => import("./pages/admin/LiveStreams"));
+const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/admin/live-streams" element={<AdminLiveStreams />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
             
             
             <Route path="*" element={<NotFound />} />

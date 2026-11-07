@@ -1,134 +1,48 @@
 import { NavLink, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  FileText,
-  Newspaper,
-  Menu,
-  MessageSquare,
-  Settings,
-  LogOut,
-  Layers,
-  Tags,
-  Megaphone,
-  Radio,
-  BarChart3,
-} from "lucide-react";
+import { LayoutDashboard, FileText, Newspaper, Menu, MessageSquare, Settings, LogOut, Layers, Tags, Megaphone, Radio, BarChart3, Plus, Users, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
-const menuItems = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
-  { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
-  { title: "Pages", url: "/admin/pages", icon: FileText },
-  { title: "Posts", url: "/admin/posts", icon: Newspaper },
-  { title: "Categories", url: "/admin/categories", icon: Tags },
-  { title: "Hero Slides", url: "/admin/hero-slides", icon: Layers },
-  { title: "Navigation", url: "/admin/navigation", icon: Menu },
-  { title: "Comments", url: "/admin/comments", icon: MessageSquare },
-  { title: "Ad Placements", url: "/admin/ads", icon: Megaphone },
-  { title: "Live Streams", url: "/admin/live-streams", icon: Radio },
-  { title: "Settings", url: "/admin/settings", icon: Settings },
+const groups = [
+  { label: "MAIN", items: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard }, { title: "Analytics", url: "/admin/analytics", icon: BarChart3 }] },
+  { label: "CONTENT", items: [{ title: "Posts", url: "/admin/posts", icon: Newspaper }, { title: "Add New Post", url: "/admin/posts?new=1", icon: Plus }, { title: "Pages", url: "/admin/pages", icon: FileText }, { title: "Categories", url: "/admin/categories", icon: Tags }, { title: "Hero Slides", url: "/admin/hero-slides", icon: Layers }] },
+  { label: "ENGAGE", items: [{ title: "Comments", url: "/admin/comments", icon: MessageSquare }, { title: "Live Streams", url: "/admin/live-streams", icon: Radio }] },
+  { label: "SITE", items: [{ title: "Navigation", url: "/admin/navigation", icon: Menu }, { title: "Ad Placements", url: "/admin/ads", icon: Megaphone }] },
+  { label: "ADMIN", items: [{ title: "Users", url: "/admin/users", icon: Users }, { title: "Settings", url: "/admin/settings", icon: Settings }] },
 ];
 
 export function AdminSidebar() {
   const { signOut } = useAuth();
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const location = useLocation();
-  const collapsed = state === "collapsed";
-
-  const isActive = (path: string) => {
-    if (path === "/admin") {
-      return location.pathname === "/admin";
-    }
-    return location.pathname.startsWith(path);
-  };
-
+  const collapsed = state === "collapsed" && !isMobile;
+  const closeMobile = () => { if (isMobile) setOpenMobile(false); };
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="border-b border-border p-4">
-        <NavLink to="/admin" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full hero-gradient flex items-center justify-center shadow-md flex-shrink-0">
-            <span className="text-primary-foreground font-heading text-lg">ﷲ</span>
-          </div>
-          {!collapsed && (
-            <span className="font-heading text-lg font-semibold text-foreground">
-              Admin Panel
-            </span>
-          )}
-        </NavLink>
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
+        <NavLink to="/admin" className="admin-sidebar-link text-sm font-semibold" aria-label="Admin Panel">{collapsed ? "DQ" : "DarseQuran · Admin"}</NavLink>
+        {isMobile && <SidebarTrigger className="text-sidebar-foreground" />}
       </SidebarHeader>
-
-      <SidebarContent className="px-2 py-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className={cn(collapsed && "sr-only")}>
-            Content Management
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/admin"}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-                        isActive(item.url)
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-muted"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarContent className="py-3">
+        {groups.map(group => <SidebarGroup key={group.label}>
+          <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+          <SidebarGroupContent><SidebarMenu>
+            {group.items.map(item => {
+              const active = item.url.includes("?") ? location.pathname + location.search === item.url : location.pathname === item.url && !(item.url === "/admin/posts" && location.search === "?new=1");
+              return <SidebarMenuItem key={item.title}><SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+                <NavLink to={item.url} onClick={closeMobile} end={item.url === "/admin"} aria-current={active ? "page" : undefined}>
+                  {collapsed && <item.icon className="h-4 w-4 shrink-0" />}
+                  {!collapsed && <span>{item.title}</span>}
+                </NavLink>
+              </SidebarMenuButton></SidebarMenuItem>;
+            })}
+          </SidebarMenu></SidebarGroupContent>
+        </SidebarGroup>)}
       </SidebarContent>
-
-      <SidebarFooter className="border-t border-border p-4">
-        <div className="flex flex-col gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start gap-3"
-            asChild
-          >
-            <NavLink to="/" target="_blank">
-              {!collapsed ? "View Website" : "🌐"}
-            </NavLink>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={signOut}
-          >
-            <LogOut className="h-4 w-4" />
-            {!collapsed && "Sign Out"}
-          </Button>
-        </div>
+      <SidebarFooter className="border-t border-sidebar-border p-2">
+        <Button asChild variant="ghost" size="sm" className="admin-sidebar-link justify-start"><NavLink to="/" target="_blank" rel="noopener noreferrer" aria-label="View Website">{collapsed ? <ExternalLink /> : "View Website"}</NavLink></Button>
+        <Button variant="ghost" size="sm" className="admin-sidebar-link justify-start" onClick={signOut} aria-label="Sign Out">{collapsed ? <LogOut /> : "Sign Out"}</Button>
       </SidebarFooter>
     </Sidebar>
   );
