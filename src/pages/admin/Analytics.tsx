@@ -349,13 +349,7 @@ export default function Analytics() {
                           <td className="py-3 px-2 font-medium truncate max-w-[200px]">{post.title}</td>
                           <td className="py-3 px-2 text-muted-foreground">{post.category || "—"}</td>
                           <td className="py-3 px-2">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              post.status === "published" 
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
-                                : post.status === "scheduled"
-                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                            }`}>
+                            <span className="inline-flex items-center border border-border bg-secondary text-secondary-foreground px-2 py-0.5 text-xs font-medium">
                               {post.status}
                             </span>
                           </td>
@@ -381,7 +375,7 @@ export default function Analytics() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Flame className="h-5 w-5 text-orange-500" />
+                  <Flame className="h-5 w-5 text-muted-foreground" />
                   Popular Posts
                 </CardTitle>
               </CardHeader>
@@ -400,7 +394,7 @@ export default function Analytics() {
                         <tr key={post.id} className="border-b border-border/50 hover:bg-muted/50">
                           <td className="py-3 px-2 font-medium truncate max-w-[200px]">
                             <span className="inline-flex items-center gap-2">
-                              {index < 3 && <span className="text-orange-500 font-bold">#{index + 1}</span>}
+                              {index < 3 && <span className="text-muted-foreground font-bold">#{index + 1}</span>}
                               {post.title}
                             </span>
                           </td>

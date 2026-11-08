@@ -211,7 +211,7 @@ export default function AdminComments() {
                           onClick={() => updateStatus(comment.id, "approved")}
                           title="Approve"
                         >
-                          <Check className="h-4 w-4 text-green-600" />
+                          <Check className="h-4 w-4 text-primary" />
                         </Button>
                       )}
                       {comment.status !== "spam" && (
@@ -221,7 +221,7 @@ export default function AdminComments() {
                           onClick={() => updateStatus(comment.id, "spam")}
                           title="Mark as spam"
                         >
-                          <X className="h-4 w-4 text-yellow-600" />
+                          <X className="h-4 w-4 text-muted-foreground" />
                         </Button>
                       )}
                       <Button

@@ -244,8 +244,7 @@ export default function AdminPosts() {
         toast({ title: "Success", description: "Post created successfully" });
       }
 
-      setDialogOpen(false);
-      resetForm();
+      closePostDialog();
       fetchData();
     } catch (error: any) {
       console.error("Error saving post:", error);
@@ -308,6 +307,16 @@ export default function AdminPosts() {
     });
   };
 
+  const closePostDialog = () => {
+    setDialogOpen(false);
+    resetForm();
+    if (searchParams.has("new")) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("new");
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
+
   const publishedCount = posts.filter(p => p.status === "published").length;
   const draftCount = posts.filter(p => p.status === "draft").length;
   const scheduledCount = posts.filter(p => p.status === "scheduled").length;
@@ -346,11 +355,8 @@ export default function AdminPosts() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Manage Posts</CardTitle>
           <Dialog open={dialogOpen} onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) {
-              resetForm();
-              if (searchParams.has("new")) setSearchParams({}, { replace: true });
-            }
+            if (open) setDialogOpen(true);
+            else closePostDialog();
           }}>
             <DialogTrigger asChild>
               <Button>
@@ -596,7 +602,7 @@ export default function AdminPosts() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setDialogOpen(false)}
+                    onClick={closePostDialog}
                   >
                     Cancel
                   </Button>
