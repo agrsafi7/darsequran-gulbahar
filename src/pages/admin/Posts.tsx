@@ -1,144 +1,690 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { format } from "date-fns";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Plus } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Pencil, Trash2, Loader2, CalendarIcon, Sparkles, Newspaper, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { countByStatus, filterPosts, paginate, type PostStatusTab } from "./posts/postList";
+import { cn } from "@/lib/utils";
 
-const TABS: { key: PostStatusTab; label: string }[] = [
-  { key: "all", label: "All" }, { key: "published", label: "Published" },
-  { key: "draft", label: "Drafts" }, { key: "scheduled", label: "Scheduled" },
-];
-const STATUS_LABEL: Record<string, string> = { published: "Published", draft: "Draft", scheduled: "Scheduled" };
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  content: string | null;
+  excerpt: string | null;
+  featured_image: string | null;
+  category: string | null;
+  status: string;
+  comments_enabled: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface DarsCategory {
+  id: string;
+  title: string;
+}
 
 export default function AdminPosts() {
-  const [params, setParams] = useSearchParams();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const tab = (TABS.some(t => t.key === params.get("status")) ? params.get("status") : "all") as PostStatusTab;
-  const category = params.get("category") || "all";
-  const page = Number(params.get("page")) || 1;
-  const [search, setSearch] = useState(params.get("s") || "");
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [darsCategories, setDarsCategories] = useState<DarsCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [dialogOpen, setDialogOpen] = useState(searchParams.get("new") === "1");
 
-  const update = (changes: Record<string, string | null>) => {
-    const next = new URLSearchParams(params);
-    Object.entries(changes).forEach(([k, v]) => (v === null || v === "" ? next.delete(k) : next.set(k, v)));
-    if (!("page" in changes)) next.delete("page");
-    setParams(next, { replace: true });
-  };
   useEffect(() => {
-    const t = setTimeout(() => { if ((params.get("s") || "") !== search) update({ s: search }); }, 250);
-    return () => clearTimeout(t);
-  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["admin-posts-list"],
-    queryFn: async () => {
-      const [posts, comments, cats, dars] = await Promise.all([
-        supabase.from("posts").select("id, title, slug, category, status, comments_enabled, published_at, created_at, updated_at").order("created_at", { ascending: false }),
-        supabase.from("comments").select("post_id"),
-        supabase.from("categories").select("id, name").order("sort_order"),
-        supabase.from("dars_categories").select("id, title").order("sort_order"),
-      ]);
-      if (posts.error) throw posts.error;
-      const commentCounts = new Map<string, number>();
-      (comments.data || []).forEach(c => commentCounts.set(c.post_id, (commentCounts.get(c.post_id) || 0) + 1));
-      const names = new Set<string>();
-      (cats.data || []).forEach(c => names.add(c.name));
-      (dars.data || []).forEach(c => names.add(c.title));
-      (posts.data || []).forEach(p => p.category && names.add(p.category));
-      return { posts: posts.data || [], commentCounts, categories: [...names] };
-    },
+    if (searchParams.get("new") === "1") setDialogOpen(true);
+  }, [searchParams]);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [formData, setFormData] = useState({
+    title: "",
+    slug: "",
+    content: "",
+    excerpt: "",
+    featured_image: "",
+    playlist_embed_url: "",
+    archive_item_id: "",
+    category: "",
+    status: "draft",
+    comments_enabled: true,
+    published_at: null as Date | null,
   });
+  const { toast } = useToast();
 
-  const posts = data?.posts || [];
-  const counts = countByStatus(posts);
-  const filtered = useMemo(() => filterPosts(posts, tab, params.get("s") || "", category), [posts, tab, params, category]);
-  const view = paginate(filtered, page);
+  const handleGenerateImage = async () => {
+    if (!formData.title.trim()) {
+      toast({
+        title: "Title Required",
+        description: "Please enter a post title first to generate an image.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Delete “${title}”? This cannot be undone.`)) return;
-    const { error } = await supabase.from("posts").delete().eq("id", id);
-    if (error) return toast({ title: "Error", description: "Failed to delete post", variant: "destructive" });
-    toast({ title: "Post deleted" });
-    queryClient.invalidateQueries({ queryKey: ["admin-posts-list"] });
+    setGeneratingImage(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-post-image`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ title: formData.title }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate image");
+      }
+
+      setFormData((prev) => ({ ...prev, featured_image: data.imageUrl }));
+      toast({
+        title: "Image Generated",
+        description: "AI has created an Islamic-themed image for your post.",
+      });
+    } catch (error: any) {
+      console.error("Error generating image:", error);
+      const isPaymentError = error.message?.includes("Payment required") || error.message?.includes("credits");
+      toast({
+        title: "Generation Failed",
+        description: isPaymentError 
+          ? "AI credits unavailable. Please enter an image URL manually instead."
+          : error.message || "Could not generate image. You can enter an image URL manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingImage(false);
+    }
   };
 
-  if (params.get("new") === "1") return <Navigate to="/admin/posts/new" replace />;
+  const fetchData = async () => {
+    try {
+      const [postsRes, categoriesRes, darsCategoriesRes] = await Promise.all([
+        supabase
+          .from("posts")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("categories")
+          .select("id, name")
+          .order("sort_order", { ascending: true }),
+        supabase
+          .from("dars_categories")
+          .select("id, title")
+          .order("sort_order", { ascending: true }),
+      ]);
+
+      if (postsRes.error) throw postsRes.error;
+      setPosts(postsRes.data || []);
+      setCategories(categoriesRes.data || []);
+      setDarsCategories(darsCategoriesRes.data || []);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast({ title: "Error", description: "Failed to fetch posts", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  const handleTitleChange = (title: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      title,
+      slug: editingPost ? prev.slug : generateSlug(title),
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      // Determine published_at date
+      let publishedAt: string | null = null;
+      if (formData.status === "published") {
+        if (formData.published_at) {
+          // Use selected date
+          publishedAt = formData.published_at.toISOString();
+        } else if (editingPost?.published_at) {
+          // Keep existing date when editing
+          publishedAt = editingPost.published_at;
+        } else {
+          // Default to now for new posts
+          publishedAt = new Date().toISOString();
+        }
+      }
+
+      const postData = {
+        title: formData.title,
+        slug: formData.slug,
+        content: formData.content,
+        excerpt: formData.excerpt,
+        featured_image: formData.featured_image || null,
+        playlist_embed_url: formData.playlist_embed_url || null,
+        archive_item_id: formData.archive_item_id || null,
+        category: formData.category || null,
+        status: formData.status,
+        comments_enabled: formData.comments_enabled,
+        published_at: publishedAt,
+      };
+
+      if (editingPost) {
+        const { error } = await supabase
+          .from("posts")
+          .update(postData)
+          .eq("id", editingPost.id);
+
+        if (error) throw error;
+        toast({ title: "Success", description: "Post updated successfully" });
+      } else {
+        const { error } = await supabase.from("posts").insert(postData);
+
+        if (error) throw error;
+        toast({ title: "Success", description: "Post created successfully" });
+      }
+
+      closePostDialog();
+      fetchData();
+    } catch (error: any) {
+      console.error("Error saving post:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save post",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = (post: Post & { playlist_embed_url?: string | null; archive_item_id?: string | null }) => {
+    setEditingPost(post);
+    setFormData({
+      title: post.title,
+      slug: post.slug,
+      content: post.content || "",
+      excerpt: post.excerpt || "",
+      featured_image: post.featured_image || "",
+      playlist_embed_url: post.playlist_embed_url || "",
+      archive_item_id: post.archive_item_id || "",
+      category: post.category || "",
+      status: post.status,
+      comments_enabled: post.comments_enabled,
+      published_at: post.published_at ? new Date(post.published_at) : null,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      const { error } = await supabase.from("posts").delete().eq("id", id);
+      if (error) throw error;
+      toast({ title: "Success", description: "Post deleted successfully" });
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast({ title: "Error", description: "Failed to delete post", variant: "destructive" });
+    }
+  };
+
+  const resetForm = () => {
+    setEditingPost(null);
+    setFormData({
+      title: "",
+      slug: "",
+      content: "",
+      excerpt: "",
+      featured_image: "",
+      playlist_embed_url: "",
+      archive_item_id: "",
+      category: "",
+      status: "draft",
+      comments_enabled: true,
+      published_at: null,
+    });
+  };
+
+  const closePostDialog = () => {
+    setDialogOpen(false);
+    resetForm();
+    if (searchParams.has("new")) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("new");
+      setSearchParams(nextParams, { replace: true });
+    }
+  };
+
+  const publishedCount = posts.filter(p => p.status === "published").length;
+  const draftCount = posts.filter(p => p.status === "draft").length;
+  const scheduledCount = posts.filter(p => p.status === "scheduled").length;
+
+  const postStatCards = [
+    { title: "Total Posts", value: posts.length, icon: Newspaper },
+    { title: "Published", value: publishedCount, icon: FileText },
+    { title: "Drafts", value: draftCount, icon: Pencil },
+    { title: "Scheduled", value: scheduledCount, icon: CalendarIcon },
+  ];
 
   return (
     <AdminLayout title="Posts">
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Button asChild size="sm"><Link to="/admin/posts/new"><Plus /> Add New Post</Link></Button>
-        </div>
-        <nav aria-label="Filter by status" className="flex flex-wrap items-center gap-x-1 text-sm">
-          {TABS.map((t, i) => (
-            <span key={t.key} className="flex items-center">
-              {i > 0 && <span className="px-1 text-muted-foreground">|</span>}
-              <button type="button" onClick={() => update({ status: t.key === "all" ? null : t.key })}
-                aria-current={tab === t.key ? "page" : undefined}
-                className={tab === t.key ? "font-semibold text-foreground" : "admin-text-link"}>
-                {t.label} <span className="text-muted-foreground font-normal">({counts[t.key]})</span>
-              </button>
-            </span>
-          ))}
-        </nav>
-        <div className="flex flex-wrap items-center gap-3">
-          <Select value={category} onValueChange={v => update({ category: v === "all" ? null : v })}>
-            <SelectTrigger className="w-full sm:w-56" aria-label="Filter by category"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
-              <SelectItem value="none">Uncategorized</SelectItem>
-              {data?.categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Input type="search" placeholder="Search post titles" aria-label="Search post titles" value={search} onChange={e => setSearch(e.target.value)} className="w-full sm:w-64 sm:ml-auto" />
-        </div>
-        <section className="border border-border bg-card">
-          {isLoading ? <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /></div> :
-            error ? <div role="alert" className="p-6 flex items-center gap-4"><p className="text-destructive text-sm">Unable to load posts.</p><Button variant="outline" size="sm" onClick={() => refetch()}>Retry</Button></div> :
+      <div className="space-y-6">
+        {!loading && (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {postStatCards.map((stat) => (
+              <div
+                key={stat.title}
+                className="admin-stat"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                    <p className="mt-2 text-3xl font-bold font-sans">{stat.value}</p>
+                  </div>
+                  <div className="admin-stat-icon">
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Manage Posts</CardTitle>
+          <Dialog open={dialogOpen} onOpenChange={(open) => {
+            if (open) setDialogOpen(true);
+            else closePostDialog();
+          }}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Post
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingPost ? "Edit Post" : "Create New Post"}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => handleTitleChange(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug">Slug</Label>
+                  <Input
+                    id="slug"
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, slug: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, category: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.length > 0 && (
+                          <>
+                            {categories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.name}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                        {darsCategories.length > 0 && (
+                          <>
+                            {categories.length > 0 && (
+                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-t mt-1 pt-2">
+                                Scholars (Dars-e-Quran)
+                              </div>
+                            )}
+                            {darsCategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.title}>
+                                {cat.title}
+                              </SelectItem>
+                            ))}
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      value={formData.status}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, status: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="published">Published</SelectItem>
+                        <SelectItem value="scheduled">Scheduled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Publish Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.published_at && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.published_at ? (
+                          format(formData.published_at, "PPP")
+                        ) : (
+                          <span>Pick a date (optional)</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.published_at || undefined}
+                        onSelect={(date) =>
+                          setFormData((prev) => ({ ...prev, published_at: date || null }))
+                        }
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <p className="text-xs text-muted-foreground">
+                    Choose a past date to backdate or a future date to schedule.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="featured_image">Featured Image URL</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="featured_image"
+                      value={formData.featured_image}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          featured_image: e.target.value,
+                        }))
+                      }
+                      placeholder="https://..."
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleGenerateImage}
+                      disabled={generatingImage || !formData.title.trim()}
+                      title="Generate Islamic-themed image using AI"
+                    >
+                      {generatingImage ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-4 w-4" />
+                      )}
+                      <span className="ml-2 hidden sm:inline">Generate</span>
+                    </Button>
+                  </div>
+                  {formData.featured_image && (
+                    <div className="mt-2 rounded-md overflow-hidden border">
+                      <img 
+                        src={formData.featured_image} 
+                        alt="Featured preview" 
+                        className="w-full h-32 object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span>Find images:</span>
+                    <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Unsplash</a>
+                    <a href="https://pexels.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Pexels</a>
+                    <a href="https://pixabay.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Pixabay</a>
+                    <span className="text-muted-foreground/60">|</span>
+                    <span>Or click Generate for AI image</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="playlist_embed_url">Playlist Embed URL (Optional)</Label>
+                  <Input
+                    id="playlist_embed_url"
+                    value={formData.playlist_embed_url}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        playlist_embed_url: e.target.value,
+                      }))
+                    }
+                    placeholder="https://soundcloud.com/... or YouTube playlist URL"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Add a SoundCloud, YouTube, or Spotify playlist URL to embed in the post.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="archive_item_id">Archive.org Item ID (Optional)</Label>
+                  <Input
+                    id="archive_item_id"
+                    value={formData.archive_item_id}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        archive_item_id: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g., DoraTafseer2007"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter the Archive.org item ID to display playlist, download list, and bulk download options.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="excerpt">Excerpt</Label>
+                  <Textarea
+                    id="excerpt"
+                    value={formData.excerpt}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, excerpt: e.target.value }))
+                    }
+                    rows={2}
+                    placeholder="Short description..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Content</Label>
+                  <RichTextEditor
+                    content={formData.content}
+                    onChange={(content) =>
+                      setFormData((prev) => ({ ...prev, content }))
+                    }
+                    placeholder="Start writing your post content..."
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="comments_enabled"
+                    checked={formData.comments_enabled}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, comments_enabled: checked }))
+                    }
+                  />
+                  <Label htmlFor="comments_enabled">Enable comments</Label>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={closePostDialog}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={saving}>
+                    {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {editingPost ? "Update" : "Create"}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : posts.length === 0 ? (
+            <p className="text-center py-8 text-muted-foreground">
+              No posts yet. Create your first post!
+            </p>
+          ) : (
             <Table>
-              <TableHeader><TableRow><TableHead>Title</TableHead><TableHead>Category</TableHead><TableHead>Status</TableHead><TableHead>Comments</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Comments</TableHead>
+                  <TableHead>Updated</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
               <TableBody>
-                {view.items.map(post => (
-                  <TableRow key={post.id} className="group">
-                    <TableCell className="min-w-48">
-                      <Link to={`/admin/posts/${post.id}/edit`} className="font-semibold">{post.title}</Link>
-                      <div className="mt-1 flex gap-2 text-xs">
-                        <Link to={`/post/${post.slug}`} target="_blank" rel="noopener noreferrer" aria-label={`View ${post.title}`}>View</Link>
-                        <span className="text-muted-foreground">|</span>
-                        <Link to={`/admin/posts/${post.id}/edit`} aria-label={`Edit ${post.title}`}>Edit</Link>
-                        <span className="text-muted-foreground">|</span>
-                        <button type="button" className="text-destructive hover:underline" onClick={() => handleDelete(post.id, post.title)} aria-label={`Delete ${post.title}`}>Delete</button>
-                      </div>
+                {posts.map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell className="font-medium">{post.title}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {post.category || "-"}
                     </TableCell>
-                    <TableCell>{post.category || "—"}</TableCell>
-                    <TableCell>{STATUS_LABEL[post.status] || post.status}</TableCell>
-                    <TableCell>{post.comments_enabled ? (data?.commentCounts.get(post.id) || 0) : "Off"}</TableCell>
-                    <TableCell className="whitespace-nowrap text-sm">
-                      <div className="text-muted-foreground text-xs">{STATUS_LABEL[post.status] || post.status}</div>
-                      {new Date(post.published_at || post.created_at).toLocaleDateString()}
+                    <TableCell>
+                      <Badge
+                        variant={
+                          post.status === "published" ? "default" : 
+                          post.status === "scheduled" ? "outline" : "secondary"
+                        }
+                        className={post.status === "scheduled" ? "border-primary text-primary" : ""}
+                      >
+                        {post.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={post.comments_enabled ? "outline" : "secondary"}>
+                        {post.comments_enabled ? "On" : "Off"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(post.updated_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(post)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(post.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
-                {!view.items.length && <TableRow><TableCell colSpan={5} className="text-muted-foreground">No posts found.</TableCell></TableRow>}
               </TableBody>
-            </Table>}
-        </section>
-        <div className="flex flex-wrap items-center justify-end gap-3 text-sm">
-          <span className="text-muted-foreground">{filtered.length} items</span>
-          <Button variant="outline" size="sm" disabled={view.page <= 1} onClick={() => update({ page: String(view.page - 1) })}>‹ Previous</Button>
-          <span>Page {view.page} of {view.totalPages}</span>
-          <Button variant="outline" size="sm" disabled={view.page >= view.totalPages} onClick={() => update({ page: String(view.page + 1) })}>Next ›</Button>
-        </div>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
       </div>
     </AdminLayout>
   );
