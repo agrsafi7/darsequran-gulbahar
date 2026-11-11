@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 const groups = [
   { label: "MAIN", items: [{ title: "Dashboard", url: "/admin", icon: LayoutDashboard }, { title: "Analytics", url: "/admin/analytics", icon: BarChart3 }] },
-  { label: "CONTENT", items: [{ title: "Posts", url: "/admin/posts", icon: Newspaper }, { title: "Add New Post", url: "/admin/posts?new=1", icon: Plus }, { title: "Pages", url: "/admin/pages", icon: FileText }, { title: "Categories", url: "/admin/categories", icon: Tags }, { title: "Hero Slides", url: "/admin/hero-slides", icon: Layers }] },
+  { label: "CONTENT", items: [{ title: "Posts", url: "/admin/posts", icon: Newspaper }, { title: "Add New Post", url: "/admin/posts/new", icon: Plus }, { title: "Pages", url: "/admin/pages", icon: FileText }, { title: "Categories", url: "/admin/categories", icon: Tags }, { title: "Hero Slides", url: "/admin/hero-slides", icon: Layers }] },
   { label: "ENGAGE", items: [{ title: "Comments", url: "/admin/comments", icon: MessageSquare }, { title: "Live Streams", url: "/admin/live-streams", icon: Radio }] },
   { label: "SITE", items: [{ title: "Navigation", url: "/admin/navigation", icon: Menu }, { title: "Ad Placements", url: "/admin/ads", icon: Megaphone }] },
   { label: "ADMIN", items: [{ title: "Users", url: "/admin/users", icon: Users }, { title: "Settings", url: "/admin/settings", icon: Settings }] },
@@ -29,7 +29,7 @@ export function AdminSidebar() {
           <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
           <SidebarGroupContent><SidebarMenu>
             {group.items.map(item => {
-              const active = item.url.includes("?") ? location.pathname + location.search === item.url : location.pathname === item.url && !(item.url === "/admin/posts" && location.search === "?new=1");
+              const active = item.url === "/admin/posts" ? location.pathname === "/admin/posts" || /^\/admin\/posts\/[^/]+\/edit$/.test(location.pathname) : location.pathname === item.url;
               return <SidebarMenuItem key={item.title}><SidebarMenuButton asChild isActive={active} tooltip={item.title}>
                 <NavLink to={item.url} onClick={closeMobile} end={item.url === "/admin"} aria-current={active ? "page" : undefined}>
                   {collapsed && <item.icon className="h-4 w-4 shrink-0" />}

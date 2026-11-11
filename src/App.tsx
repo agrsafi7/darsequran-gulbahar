@@ -24,6 +24,7 @@ const AdminLogin = lazy(() => import("./pages/admin/Login"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const AdminPages = lazy(() => import("./pages/admin/Pages"));
 const AdminPosts = lazy(() => import("./pages/admin/Posts"));
+const AdminPostEditor = lazy(() => import("./pages/admin/PostEditor"));
 const AdminCategories = lazy(() => import("./pages/admin/Categories"));
 const AdminNavigation = lazy(() => import("./pages/admin/Navigation"));
 const AdminMedia = lazy(() => import("./pages/admin/Media"));
@@ -74,6 +75,8 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/pages" element={<AdminPages />} />
             <Route path="/admin/posts" element={<AdminPosts />} />
+            <Route path="/admin/posts/new" element={<AdminPostEditor />} />
+            <Route path="/admin/posts/:id/edit" element={<AdminPostEditor />} />
             <Route path="/admin/categories" element={<AdminCategories />} />
             <Route path="/admin/hero-slides" element={<AdminHeroSlides />} />
             <Route path="/admin/navigation" element={<AdminNavigation />} />

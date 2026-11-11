@@ -8,5 +8,6 @@
 # Sidebar colours
 - [x] Keep the sidebar charcoal with readable text in light and dark mode (colours only).
 
-# Posts rebuild (paused by user — do not start until asked)
-- [ ] Filters, search, pagination, and full-page editor.
+# Posts rebuild
+- [ ] List: status tabs with counts, title search, category filter, table, 20 per page.
+- [ ] Full-page two-column Add/Edit editor keeping every post field.
