@@ -9,5 +9,5 @@
 - [x] Keep the sidebar charcoal with readable text in light and dark mode (colours only).
 
 # Posts rebuild
-- [ ] List: status tabs with counts, title search, category filter, table, 20 per page.
-- [ ] Full-page two-column Add/Edit editor keeping every post field.
+- [x] List: status tabs with counts, title search, category filter, table, 20 per page.
+- [x] Full-page two-column Add/Edit editor keeping every post field.

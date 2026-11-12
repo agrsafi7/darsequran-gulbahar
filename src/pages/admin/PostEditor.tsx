@@ -138,7 +138,7 @@ export default function PostEditor() {
               <Input id="featured_image" value={form.featured_image} onChange={e => set("featured_image", e.target.value)} placeholder="https://i.ibb.co/..." />
               {form.featured_image && (imgError
                 ? <p className="text-xs text-destructive">Image could not be loaded from this URL.</p>
-                : <img src={form.featured_image} alt="Featured image preview" className="w-full border border-border object-cover max-h-48" onError={() => setImgError(true)} />)}
+                : <img src={form.featured_image} loading="eager" alt="Featured image preview" className="w-full border border-border object-cover max-h-48" onError={() => setImgError(true)} />)}
               <a href="https://imgbb.com" target="_blank" rel="noopener noreferrer" className="text-sm">Open ImgBB to upload an image</a>
             </Box>
             <Box title="Discussion">
